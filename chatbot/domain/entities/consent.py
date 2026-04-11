@@ -13,24 +13,32 @@ class ConsentStatus(str, Enum):
     COMPLETED = "COMPLETED"
 
 
+class ConsentChoice(str, Enum):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    DECLINED = "DECLINED"
+
+
 class Consent(BaseModel):
     id: UUID
     application_id: UUID
-    terms_id: UUID
+    term_id: UUID
     status: ConsentStatus
+    choice: ConsentChoice
     created_at: datetime
     updated_at: datetime | None
     model_config = ConfigDict(from_attributes=True)
     _step_execution: StepExecution | None = PrivateAttr()
 
     @classmethod
-    def create(cls, application_id: UUID, terms_id: UUID) -> "Consent":
+    def create(cls, application_id: UUID, term_id: UUID) -> "Consent":
         now = datetime.now(timezone.utc)
         instance = cls(
             id=uuid7(),
             application_id=application_id,
-            terms_id=terms_id,
+            term_id=term_id,
             status=ConsentStatus.PENDING,
+            choice=ConsentChoice.PENDING,
             created_at=now,
             updated_at=None,
         )
@@ -47,14 +55,16 @@ class Consent(BaseModel):
             is_final=False,
         )
 
-    def block(self) -> None:
+    def decline(self) -> None:
         self.status = ConsentStatus.BLOCKED
+        self.choice = ConsentChoice.DECLINED
         self.updated_at = datetime.now(timezone.utc)
         if self._step_execution is not None:
             self._attach_step_execution()
 
-    def complete(self) -> None:
+    def accept(self) -> None:
         self.status = ConsentStatus.COMPLETED
+        self.choice = ConsentChoice.ACCEPTED
         self.updated_at = datetime.now(timezone.utc)
         if self._step_execution is not None:
             self._attach_step_execution()

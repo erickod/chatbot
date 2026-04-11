@@ -1,5 +1,11 @@
 from uuid import UUID
 
+from chatbot.application.usecases.present_summary_step import (
+    Input as SaveConsentStepInput,
+)
+from chatbot.application.usecases.present_summary_step import (
+    SaveConsentStep,
+)
 from chatbot.application.usecases.register_originator_seller import (
     Input as RegisterOriginatorInput,
 )
@@ -18,6 +24,7 @@ from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
 )
 from chatbot.infra.repositories.fake_company_repository import FakeCompanyRepository
+from chatbot.infra.repositories.fake_consent_repository import FakeConsentRepository
 from chatbot.infra.repositories.fake_originator_repository import (
     FakeOriginatorRepository,
 )
@@ -28,6 +35,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     originator_repository = FakeOriginatorRepository()
     application_repository = FakeApplicationRepository()
     company_repository = FakeCompanyRepository()
+    consent_repository = FakeConsentRepository()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -71,5 +79,20 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     save_cnpj_output = await sut.execute(save_cnpj_input)
     saved_company = company_repository.by_id[save_cnpj_output.id]
+    assert saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
+    assert saved_company.application_id == start_application_output.id
+
+    ########## SaveConsent ##########
+    save_consent_input = SaveConsentStepInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+        status="ACCEPTED",
+    )
+    sut = SaveConsentStep(
+        consent_repository=consent_repository,
+        application_repository=application_repository,
+    )
+    save_consent_output = await sut.execute(save_consent_input)
+    saved_company = consent_repository.by_id[save_consent_output.id]
     assert saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
     assert saved_company.application_id == start_application_output.id
