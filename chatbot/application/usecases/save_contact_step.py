@@ -10,7 +10,7 @@ from chatbot.domain.entities.application_contact import (
 )
 
 
-class ContactStepInput(BaseModel):
+class Input(BaseModel):
     originator_phone: str
     company_phone: str
     cpf: str | None = None
@@ -19,7 +19,7 @@ class ContactStepInput(BaseModel):
     role: str | None = None
 
 
-class ContactStepOutput(BaseModel):
+class Output(BaseModel):
     id: UUID | None
     step_execution_id: UUID | None
     status: str
@@ -27,8 +27,8 @@ class ContactStepOutput(BaseModel):
 
 
 class SaveContactStep:
-    input_schema: type[ContactStepInput] = ContactStepInput
-    output_schema: type[ContactStepOutput] = ContactStepOutput
+    input_schema: type[Input] = Input
+    output_schema: type[Output] = Output
     name: str = "contact"
 
     def __init__(
@@ -39,7 +39,7 @@ class SaveContactStep:
         self._contact_repo = contact_repo
         self._application_repo = application_repo
 
-    async def execute(self, input: ContactStepInput) -> ContactStepOutput:
+    async def execute(self, input: Input) -> Output:
         application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
@@ -53,7 +53,7 @@ class SaveContactStep:
                 role=input.role,
             )
             contact.block(message="Application not found")
-            return ContactStepOutput(
+            return Output(
                 id=None,
                 step_execution_id=None,
                 status=ContactStatus.BLOCKED,
@@ -68,7 +68,7 @@ class SaveContactStep:
         )
         application.advance_step(contact.step_execution)
         await self._contact_repo.create(contact)
-        return ContactStepOutput(
+        return Output(
             id=contact.id,
             step_execution_id=contact.step_execution.id,
             status=contact.status,
