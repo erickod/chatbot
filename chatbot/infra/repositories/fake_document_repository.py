@@ -4,7 +4,12 @@ from chatbot.domain.entities.application_document import ApplicationDocument
 
 
 class FakeDocumentRepository:
-    def __init__(self, seed: list[ApplicationDocument] = []) -> None:
+    def __init__(
+        self,
+        seed: list[ApplicationDocument] = [],
+        direct_return: ApplicationDocument | None = None,
+    ) -> None:
+        self.direct_return = direct_return
         self.by_application_id: dict[UUID, ApplicationDocument] = {}
         self._process_seed(seed)
 
@@ -15,4 +20,6 @@ class FakeDocumentRepository:
     async def get_by_application_id(
         self, application_id: UUID
     ) -> ApplicationDocument | None:
+        if self.direct_return:
+            return self.direct_return
         return self.by_application_id.get(application_id)
