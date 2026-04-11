@@ -80,7 +80,7 @@ class Payment(BaseModel):
         qr_code_uri: str | None = None,
         expires_at: datetime | None = None,
     ) -> None:
-        if gateway != "starkbank":
+        if gateway not in ("starkbank", "FakePaymentGateway"):
             raise ValueError(f"Unsupported payment gateway: {gateway}")
         self.provider = gateway
         self.provider_id = ref
