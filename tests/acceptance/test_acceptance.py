@@ -1,11 +1,5 @@
 from uuid import UUID
 
-from chatbot.application.usecases.present_summary_step import (
-    Input as SaveConsentStepInput,
-)
-from chatbot.application.usecases.present_summary_step import (
-    SaveConsentStep,
-)
 from chatbot.application.usecases.register_originator_seller import (
     Input as RegisterOriginatorInput,
 )
@@ -14,6 +8,12 @@ from chatbot.application.usecases.register_originator_seller import (
 )
 from chatbot.application.usecases.save_cnpj_step import Input as SaveCnpjStepInput
 from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
+from chatbot.application.usecases.save_consent_step import (
+    Input as SaveConsentStepInput,
+)
+from chatbot.application.usecases.save_consent_step import (
+    SaveConsentStep,
+)
 from chatbot.application.usecases.start_application_step import (
     Input as StartApplicationInput,
 )
