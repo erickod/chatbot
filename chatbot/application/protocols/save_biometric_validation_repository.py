@@ -1,5 +1,5 @@
 from chatbot.domain.entities.biometric_validation import BiometricValidation
 
 
-class SaveBiometricValidationRepository:
-    async def run(self, biometric: BiometricValidation) -> None: ...
+class BiometricValidationRepository:
+    async def create(self, biometric: BiometricValidation) -> None: ...

@@ -3,8 +3,8 @@ from chatbot.infra.db.postgres.base_repository import BaseRepository
 from chatbot.infra.orm.sqlalchemy.models import DBBiometricValidation, DBStepExecution
 
 
-class SASaveBiometricValidationRepository(BaseRepository):
-    async def run(self, biometric: BiometricValidation) -> None:
+class SABiometricValidationRepository(BaseRepository):
+    async def create(self, biometric: BiometricValidation) -> None:
         step = biometric.step_execution
         self.db_session.add(
             DBBiometricValidation(

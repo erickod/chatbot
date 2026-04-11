@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, Field
 
-from chatbot.application.protocols.save_company_repository import SaveCompanyRepository
+from chatbot.application.protocols.save_company_repository import CompanyRepository
 from chatbot.domain.entities.customer import Customer, CustomerStatus
 
 
@@ -28,7 +28,7 @@ class SaveCnpjStep:
     def __init__(
         self,
         *,
-        save_company_repo: SaveCompanyRepository,
+        save_company_repo: CompanyRepository,
         load_application_repo: ApplicationRepository,
     ) -> None:
         self._save_company_repo = save_company_repo
@@ -49,7 +49,7 @@ class SaveCnpjStep:
             application_id=application.id,
         )
         application.advance_step(customer.step_execution)
-        await self._save_company_repo.run(customer)
+        await self._save_company_repo.create(customer)
         return CnpjStepOutput(
             id=customer.id,
             step_execution_id=customer.step_execution.id,

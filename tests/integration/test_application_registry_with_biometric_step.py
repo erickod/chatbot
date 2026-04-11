@@ -1,22 +1,30 @@
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatbot.application.services.usecase_registry import UseCaseRegistry
 from chatbot.application.usecases.request_biometric_validation_step import (
     RequestBiometricValidationStep,
 )
-from chatbot.domain.entities.application import ApplicationStatus
-from chatbot.domain.entities.biometric_validation import BiometricValidationStatus
+from chatbot.domain.entities.application import Application, ApplicationStatus
+from chatbot.domain.entities.biometric_validation import (
+    BiometricValidation,
+    BiometricValidationStatus,
+)
 from chatbot.infra.orm.sqlalchemy.models import (
     DBApplication,
     DBBiometricValidation,
     DBStepExecution,
 )
+from chatbot.infra.repositories.fake_application_repository import (
+    FakeApplicationRepository,
+)
+from chatbot.infra.repositories.fake_biometric_validation_repository import (
+    FakeBiometricValidationRepository,
+)
 from chatbot.infra.repositories.sa_load_application_repository import (
     SAApplicationRepository,
 )
 from chatbot.infra.repositories.save_biometric_validation_repository import (
-    SASaveBiometricValidationRepository,
+    SABiometricValidationRepository,
 )
 
 
@@ -25,11 +33,9 @@ async def test_given_application_when_save_biometric_then_biometric_row_persiste
 ) -> None:
     """
     GIVEN an application stored in the database
-    WHEN  SASaveBiometricValidationRepository.run() is called with a BiometricValidation entity
+    WHEN  SABiometricValidationRepository.create() is called with a BiometricValidation entity
     THEN  a DBBiometricValidation row is persisted with correct field values
     """
-    from chatbot.domain.entities.biometric_validation import BiometricValidation
-
     db_app = DBApplication(
         originator_phone="orig_bio_1",
         company_phone="appl_bio_1",
@@ -43,8 +49,8 @@ async def test_given_application_when_save_biometric_then_biometric_row_persiste
         profile_ref="profile-abc",
         validation_result={"score": 0.98},
     )
-    repo = SASaveBiometricValidationRepository(db)
-    await repo.run(biometric)
+    repo = SABiometricValidationRepository(db)
+    await repo.create(biometric)
     await db.flush()
 
     result = await db.get(DBBiometricValidation, biometric.id)
@@ -60,11 +66,9 @@ async def test_given_application_when_save_biometric_then_step_execution_persist
 ) -> None:
     """
     GIVEN an application stored in the database
-    WHEN  SASaveBiometricValidationRepository.run() is called with a BiometricValidation entity
+    WHEN  SABiometricValidationRepository.create() is called with a BiometricValidation entity
     THEN  a DBStepExecution row is persisted with data containing profile_ref and validation_result
     """
-    from chatbot.domain.entities.biometric_validation import BiometricValidation
-
     db_app = DBApplication(
         originator_phone="orig_bio_2",
         company_phone="appl_bio_2",
@@ -78,8 +82,8 @@ async def test_given_application_when_save_biometric_then_step_execution_persist
         profile_ref="profile-xyz",
         validation_result={"score": 0.75},
     )
-    repo = SASaveBiometricValidationRepository(db)
-    await repo.run(biometric)
+    repo = SABiometricValidationRepository(db)
+    await repo.create(biometric)
     await db.flush()
 
     step = await db.get(DBStepExecution, biometric.step_execution.id)
@@ -89,50 +93,42 @@ async def test_given_application_when_save_biometric_then_step_execution_persist
     assert "message" not in step.data
 
 
-async def test_given_application_when_registry_runs_biometric_step_then_await_confirmation(
-    db: AsyncSession,
-) -> None:
+async def test_given_application_when_registry_runs_biometric_step_then_await_confirmation() -> (
+    None
+):
     """
-    GIVEN an application in the database matching the input phones
+    GIVEN an application matching the input phones in the fake repository
     WHEN  UseCaseRegistry.run() executes the 'biometric' step
-    THEN  the output status is AWAIT_CONFIRMATION and both DB rows are persisted
+    THEN  the output status is AWAIT_CONFIRMATION and biometric is stored in the fake repo
     """
-    db_app = DBApplication(
-        originator_phone="orig_bio_3",
-        company_phone="appl_bio_3",
-        status=ApplicationStatus.IN_PROGRESS,
+    application = Application.create(
+        originator_phone="orig_bio_3", company_phone="appl_bio_3"
     )
-    db.add(db_app)
-    await db.flush()
-
+    fake_biometric_repo = FakeBiometricValidationRepository()
     registry = UseCaseRegistry()
     registry.register_step(
         RequestBiometricValidationStep(
-            save_biometric_repo=SASaveBiometricValidationRepository(db),
-            load_application_repo=SAApplicationRepository(db),
+            save_biometric_repo=fake_biometric_repo,
+            load_application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 
-    data = dict(
-        originator_phone="orig_bio_3",
-        company_phone="appl_bio_3",
-        profile_ref="profile-reg",
-        validation_result={"score": 0.90},
+    output = await registry.run(
+        dict(
+            originator_phone="orig_bio_3",
+            company_phone="appl_bio_3",
+            profile_ref="profile-reg",
+            validation_result={"score": 0.90},
+        ),
+        name="biometric",
     )
-    output = await registry.run(data, name="biometric")
 
     assert output.id is not None
     assert output.step_execution_id is not None
     assert output.status == BiometricValidationStatus.AWAIT_CONFIRMATION
-
-    biometric_row = await db.get(DBBiometricValidation, output.id)
-    assert biometric_row is not None
-    assert biometric_row.profile_ref == "profile-reg"
-
-    step_row = await db.get(DBStepExecution, output.step_execution_id)
-    assert step_row is not None
-    assert step_row.data["profile_ref"] == "profile-reg"
-    assert step_row.data["validation_result"] == {"score": 0.90}
+    biometric = fake_biometric_repo.by_id[output.id]
+    assert biometric.profile_ref == "profile-reg"
+    assert biometric.validation_result == {"score": 0.90}
 
 
 async def test_given_no_application_when_biometric_step_runs_then_blocked(
@@ -143,21 +139,25 @@ async def test_given_no_application_when_biometric_step_runs_then_blocked(
     WHEN  UseCaseRegistry.run() executes the 'biometric' step
     THEN  the output status is BLOCKED, step_execution_id is None, and no rows are persisted
     """
+    from sqlalchemy import select
+
     registry = UseCaseRegistry()
     registry.register_step(
         RequestBiometricValidationStep(
-            save_biometric_repo=SASaveBiometricValidationRepository(db),
+            save_biometric_repo=SABiometricValidationRepository(db),
             load_application_repo=SAApplicationRepository(db),
         )
     )
 
-    data = dict(
-        originator_phone="unknown_orig",
-        company_phone="unknown_appl",
-        profile_ref="profile-ghost",
-        validation_result={"score": 0.0},
+    output = await registry.run(
+        dict(
+            originator_phone="unknown_orig",
+            company_phone="unknown_appl",
+            profile_ref="profile-ghost",
+            validation_result={"score": 0.0},
+        ),
+        name="biometric",
     )
-    output = await registry.run(data, name="biometric")
 
     assert output.status == BiometricValidationStatus.BLOCKED
     assert output.id is None

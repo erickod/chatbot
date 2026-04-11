@@ -3,8 +3,8 @@ from chatbot.infra.db.postgres.base_repository import BaseRepository
 from chatbot.infra.orm.sqlalchemy.models import DBStepExecution
 
 
-class SASaveCompanyRepository(BaseRepository):
-    async def run(self, customer: Customer) -> None:
+class SACompanyRepository(BaseRepository):
+    async def create(self, customer: Customer) -> None:
         step = customer.step_execution
         self.db_session.add(
             DBStepExecution(

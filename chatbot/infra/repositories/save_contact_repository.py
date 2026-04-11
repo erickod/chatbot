@@ -6,8 +6,8 @@ from chatbot.infra.orm.sqlalchemy.models import (
 )
 
 
-class SASaveContactRepository(BaseRepository):
-    async def run(self, contact: ApplicationContact) -> None:
+class SAContactRepository(BaseRepository):
+    async def create(self, contact: ApplicationContact) -> None:
         step = contact.step_execution
         data = {
             "cpf": contact.cpf,

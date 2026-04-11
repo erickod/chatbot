@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from chatbot.application.protocols.application_repository import ApplicationRepository
 from chatbot.application.protocols.save_biometric_validation_repository import (
-    SaveBiometricValidationRepository,
+    BiometricValidationRepository,
 )
 from chatbot.domain.entities.biometric_validation import (
     BiometricValidation,
@@ -33,7 +33,7 @@ class RequestBiometricValidationStep:
 
     def __init__(
         self,
-        save_biometric_repo: SaveBiometricValidationRepository,
+        save_biometric_repo: BiometricValidationRepository,
         load_application_repo: ApplicationRepository,
     ) -> None:
         self._save_biometric_repo = save_biometric_repo
@@ -57,7 +57,7 @@ class RequestBiometricValidationStep:
             validation_result=input.validation_result,
         )
         application.advance_step(biometric.step_execution)
-        await self._save_biometric_repo.run(biometric)
+        await self._save_biometric_repo.create(biometric)
         return BiometricStepOutput(
             id=biometric.id,
             step_execution_id=biometric.step_execution.id,

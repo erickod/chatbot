@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from chatbot.application.protocols.application_repository import ApplicationRepository
-from chatbot.application.protocols.save_contact_repository import SaveContactRepository
+from chatbot.application.protocols.save_contact_repository import ContactRepository
 from chatbot.domain.entities.application_contact import (
     ApplicationContact,
     ContactStatus,
@@ -33,7 +33,7 @@ class SaveContactStep:
 
     def __init__(
         self,
-        save_contact_repo: SaveContactRepository,
+        save_contact_repo: ContactRepository,
         load_application_repo: ApplicationRepository,
     ) -> None:
         self._save_contact_repo = save_contact_repo
@@ -67,7 +67,7 @@ class SaveContactStep:
             role=input.role,
         )
         application.advance_step(contact.step_execution)
-        await self._save_contact_repo.run(contact)
+        await self._save_contact_repo.create(contact)
         return ContactStepOutput(
             id=contact.id,
             step_execution_id=contact.step_execution.id,

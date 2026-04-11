@@ -1,5 +1,5 @@
 from chatbot.domain.entities.customer import Customer
 
 
-class SaveCompanyRepository:
-    async def run(self, customer: Customer) -> None: ...
+class CompanyRepository:
+    async def create(self, customer: Customer) -> None: ...
