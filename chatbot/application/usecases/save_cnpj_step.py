@@ -7,23 +7,23 @@ from chatbot.application.protocols.save_company_repository import CompanyReposit
 from chatbot.domain.entities.customer import Customer, CustomerStatus
 
 
-class CnpjStepInput(BaseModel):
+class Input(BaseModel):
     originator_phone: str
     company_phone: str
     national_id: str = Field(validation_alias=AliasChoices("national_id", "value"))
 
 
-class CnpjStepOutput(BaseModel):
+class Output(BaseModel):
     id: UUID | None = None
     step_execution_id: UUID | None = None
-    status: str
+    status: CustomerStatus
     national_id: str | None = None
     step_name: str
 
 
 class SaveCnpjStep:
-    input_schema: type[CnpjStepInput] = CnpjStepInput
-    output_schema: type[CnpjStepOutput] = CnpjStepOutput
+    input_schema: type[Input] = Input
+    output_schema: type[Output] = Output
     name: str = "cnpj"
 
     def __init__(
@@ -35,13 +35,13 @@ class SaveCnpjStep:
         self._company_repo = company_repo
         self._application_repo = application_repo
 
-    async def execute(self, input: CnpjStepInput) -> CnpjStepOutput:
+    async def execute(self, input: Input) -> Output:
         application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
         )
         if not application:
-            return CnpjStepOutput(
+            return Output(
                 status=CustomerStatus.BLOCKED,
                 step_name=self.name,
             )
@@ -51,7 +51,7 @@ class SaveCnpjStep:
         )
         application.advance_step(customer.step_execution)
         await self._company_repo.create(customer)
-        return CnpjStepOutput(
+        return Output(
             id=customer.id,
             step_execution_id=customer.step_execution.id,
             status=customer.status,

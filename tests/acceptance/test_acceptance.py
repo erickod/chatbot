@@ -6,14 +6,18 @@ from chatbot.application.usecases.register_originator_seller import (
 from chatbot.application.usecases.register_originator_seller import (
     RegisterOriginatorSellerStep,
 )
+from chatbot.application.usecases.save_cnpj_step import Input as SaveCnpjStepInput
+from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
 from chatbot.application.usecases.start_application_step import (
     Input as StartApplicationInput,
 )
 from chatbot.application.usecases.start_application_step import StartApplicationStep
 from chatbot.domain.entities.application import ApplicationStatus
+from chatbot.domain.entities.customer import CustomerStatus
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
 )
+from chatbot.infra.repositories.fake_company_repository import FakeCompanyRepository
 from chatbot.infra.repositories.fake_originator_repository import (
     FakeOriginatorRepository,
 )
@@ -23,6 +27,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     ########## REPOSITORIES ##########
     originator_repository = FakeOriginatorRepository()
     application_repository = FakeApplicationRepository()
+    company_repository = FakeCompanyRepository()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -55,14 +60,18 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     assert start_application_output.status == ApplicationStatus.PENDING
 
-    ########## START Application ##########
-    start_application_input = StartApplicationInput(
-        originator_phone=originator_phone, company_phone=company_phone
+    ########## Fill CNPJ ##########
+    save_cnpj_input = SaveCnpjStepInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+        national_id="23368630000119",
     )
-    sut = StartApplicationStep(application_repository=application_repository)
-    start_application_output = await sut.execute(start_application_input)
+    sut = SaveCnpjStep(
+        application_repo=application_repository, company_repo=company_repository
+    )
+    save_cnpj_inputoutput = await sut.execute(save_cnpj_input)
     assert (
-        start_application_output.id
-        == application_repository.by_id[start_application_output.id].id
+        save_cnpj_inputoutput.id
+        == company_repository.by_id[save_cnpj_inputoutput.id].id
     )
-    assert start_application_output.status == ApplicationStatus.PENDING
+    assert save_cnpj_inputoutput.status == CustomerStatus.COMPLETED
