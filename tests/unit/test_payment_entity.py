@@ -123,7 +123,7 @@ def test_given_valid_args_when_create_then_step_execution_has_payment_name() -> 
 def test_given_payment_when_mark_paid_called_then_status_is_completed() -> None:
     """
     GIVEN a Payment with status PENDING
-    WHEN  mark_paid() is called
+    WHEN  approve() is called
     THEN  status transitions to COMPLETED
     """
     payment = Payment.create(
@@ -138,7 +138,7 @@ def test_given_payment_when_mark_paid_called_then_status_is_completed() -> None:
         expires_at=None,
     )
 
-    payment.mark_paid()
+    payment.approve()
 
     assert payment.status == PaymentStatus.COMPLETED
 
@@ -146,7 +146,7 @@ def test_given_payment_when_mark_paid_called_then_status_is_completed() -> None:
 def test_given_payment_when_mark_paid_called_then_paid_at_is_set() -> None:
     """
     GIVEN a Payment with status PENDING
-    WHEN  mark_paid() is called
+    WHEN  approve() is called
     THEN  paid_at is populated
     """
     payment = Payment.create(
@@ -161,7 +161,7 @@ def test_given_payment_when_mark_paid_called_then_paid_at_is_set() -> None:
         expires_at=None,
     )
 
-    payment.mark_paid()
+    payment.approve()
 
     assert payment.paid_at is not None
 

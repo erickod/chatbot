@@ -102,7 +102,7 @@ class Payment(BaseModel):
             is_final=False,
         )
 
-    def mark_paid(self) -> None:
+    def approve(self) -> None:
         self.status = PaymentStatus.COMPLETED
         self.paid_at = datetime.now(timezone.utc)
         self.updated_at = self.paid_at
