@@ -87,7 +87,7 @@ class FlowStage(BaseModel):
 
 class FlowInput(BaseModel):
     flow_id: str = Field(validation_alias="flowId")
-    profile_ref: str = Field(validation_alias="profileRef")
+    provider_id: str = Field(validation_alias="profileRef")
     trigger_type: str = Field(validation_alias="triggerType")
 
 
@@ -100,7 +100,7 @@ class ProfileFlow(BaseModel):
     status: ProfileFlowStatus
     input: FlowInput
     trigger_type: str = Field(validation_alias="triggerType")
-    profile_ref: str = Field(validation_alias="profileRef")
+    provider_id: str = Field(validation_alias="profileRef")
     flow_version: int | None = Field(validation_alias="flowVersion", default=None)
     flow_name: str = Field(validation_alias="flowName")
     flow_id: str = Field(validation_alias="flowId")

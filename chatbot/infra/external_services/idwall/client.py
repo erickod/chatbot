@@ -135,12 +135,12 @@ class IdwallClient:
             )
 
     async def _start_flow(
-        self, profile_ref: UUID, flow_id: str
+        self, provider_id: UUID, flow_id: str
     ) -> StartProfileFlowResponse:
         rsp: HttpResponseInterface = await self._request(
             http_request=HttpRequestInterface(
                 host=settings.IDWALL_BASE_URL,
-                path=f"/maestro/profile/{str(profile_ref)}/flow/{flow_id}",
+                path=f"/maestro/profile/{str(provider_id)}/flow/{flow_id}",
                 method="POST",
                 headers=self._get_api_headers(),
             )
@@ -168,23 +168,23 @@ class IdwallClient:
         self, registration_id: UUID
     ) -> StartProfileFlowResponse:
         return await self._start_flow(
-            profile_ref=registration_id, flow_id=settings.IDWALL_FACELINK_FLOW_ID
+            provider_id=registration_id, flow_id=settings.IDWALL_FACELINK_FLOW_ID
         )
 
     async def start_document_flow(
         self, registration_id: UUID
     ) -> StartProfileFlowResponse:
         return await self._start_flow(
-            profile_ref=registration_id, flow_id=settings.IDWALL_DOCUMENT_FLOW_ID
+            provider_id=registration_id, flow_id=settings.IDWALL_DOCUMENT_FLOW_ID
         )
 
     async def list_flows_exections(
-        self, profile_ref: UUID, limit: int = 10
+        self, provider_id: UUID, limit: int = 10
     ) -> List[ProfileFlow]:
         rsp: HttpResponseInterface = await self._request(
             http_request=HttpRequestInterface(
                 host=settings.IDWALL_BASE_URL,
-                path=f"/maestro/profile/{str(profile_ref)}/profileFlows",
+                path=f"/maestro/profile/{str(provider_id)}/profileFlows",
                 method="GET",
                 headers=self._get_api_headers(),
                 params={"limit": str(limit)},
