@@ -1,5 +1,5 @@
 from chatbot.domain.entities.caller import Caller
 
 
-class SaveCallerRepository:
+class CallerRepository:
     async def create(self, caller: Caller) -> None: ...

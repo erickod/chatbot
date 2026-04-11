@@ -83,7 +83,7 @@ class NameStepOutput(BaseModel):
     step_name: str
 
 
-class SaveCallerStep:
+class SaveNameStep:
     input_schema: type[NameStepInput] = NameStepInput
     output_schema: type[NameStepOutput] = NameStepOutput
     name: str = "name"

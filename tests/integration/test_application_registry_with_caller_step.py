@@ -1,10 +1,10 @@
 from chatbot.application.services.usecase_registry import UseCaseRegistry
-from chatbot.application.usecases.save_caller_step import SaveCallerStep
+from chatbot.application.usecases.save_caller_step import SaveNameStep
 from chatbot.domain.entities.application import Application, ApplicationStatus
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
 )
-from chatbot.infra.repositories.fake_save_caller_repository import FakeCallerRepository
+from chatbot.infra.repositories.fake_caller_repository import FakeCallerRepository
 
 
 async def test_given_application_exists_when_registry_runs_name_step_then_completed() -> (
@@ -22,7 +22,7 @@ async def test_given_application_exists_when_registry_runs_name_step_then_comple
     fake_caller_repo = FakeCallerRepository()
     registry = UseCaseRegistry()
     registry.register_step(
-        SaveCallerStep(
+        SaveNameStep(
             save_caller_repo=fake_caller_repo,
             load_application_repo=FakeApplicationRepository(seed=[application]),
         )
@@ -53,7 +53,7 @@ async def test_given_no_application_when_registry_runs_name_step_then_blocked() 
     fake_caller_repo = FakeCallerRepository()
     registry = UseCaseRegistry()
     registry.register_step(
-        SaveCallerStep(
+        SaveNameStep(
             save_caller_repo=fake_caller_repo,
             load_application_repo=FakeApplicationRepository(),
         )

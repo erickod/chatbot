@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import AliasChoices, BaseModel, Field
 
 from chatbot.application.protocols.application_repository import ApplicationRepository
-from chatbot.application.protocols.save_caller_repository import SaveCallerRepository
+from chatbot.application.protocols.save_caller_repository import CallerRepository
 from chatbot.domain.entities.caller import Caller, NameStepStatus
 
 
@@ -19,14 +19,14 @@ class Output(BaseModel):
     status: str
 
 
-class SaveCallerStep:
+class SaveNameStep:
     input_schema: type[Input] = Input
     output_schema: type[Output] = Output
     name: str = "name"
 
     def __init__(
         self,
-        save_caller_repo: SaveCallerRepository,
+        save_caller_repo: CallerRepository,
         load_application_repo: ApplicationRepository,
     ) -> None:
         self._save_caller_repo = save_caller_repo
