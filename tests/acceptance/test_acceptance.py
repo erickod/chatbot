@@ -8,6 +8,12 @@ from chatbot.application.usecases.register_originator_seller import (
 from chatbot.application.usecases.register_originator_seller import (
     RegisterOriginatorSellerStep,
 )
+from chatbot.application.usecases.request_biometric_validation_step import (
+    Input as StartBiometricValidationInput,
+)
+from chatbot.application.usecases.request_biometric_validation_step import (
+    StartBiometricValidation,
+)
 from chatbot.application.usecases.request_payment_step import (
     Input as RequestPaymentStepInput,
 )
@@ -30,11 +36,15 @@ from chatbot.domain.entities import PaymentStatus
 from chatbot.domain.entities.application import ApplicationStatus
 from chatbot.domain.entities.application_contact import ContactStatus
 from chatbot.domain.entities.application_document import ApplicationDocument
+from chatbot.domain.entities.biometric_validation import BiometricValidationStatus
 from chatbot.domain.entities.consent import ConsentStatus
 from chatbot.domain.entities.customer import CustomerStatus
 from chatbot.infra.external_services.fake_payment_gateway import FakePaymentGateway
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
+)
+from chatbot.infra.repositories.fake_biometric_validation_repository import (
+    FakeBiometricValidationRepository,
 )
 from chatbot.infra.repositories.fake_company_repository import FakeCompanyRepository
 from chatbot.infra.repositories.fake_consent_repository import FakeConsentRepository
@@ -60,6 +70,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         )
     )
     fake_payment_gateway = FakePaymentGateway()
+    biometric_repo = FakeBiometricValidationRepository()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -161,3 +172,23 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         saved_payment.status == confirm_payment_output.status == PaymentStatus.COMPLETED
     )
     assert saved_payment.application_id == start_application_output.id
+    ########## StartBiometricValidation ##########
+    request_biometric_validation_input = StartBiometricValidationInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+        provider_id="any_valid_id_token",
+        provider="idwall",
+    )
+    sut = StartBiometricValidation(
+        biometric_repo=biometric_repo, application_repo=application_repo
+    )
+    request_biometric_validation_output = await sut.execute(
+        request_biometric_validation_input
+    )
+    biometric_validation = biometric_repo.by_id[request_biometric_validation_output.id]
+    assert (
+        biometric_validation.status
+        == request_biometric_validation_output.status
+        == BiometricValidationStatus.AWAIT_CONFIRMATION
+    )
+    assert biometric_validation.application_id == start_application_output.id
