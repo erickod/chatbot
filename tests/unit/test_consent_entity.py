@@ -11,7 +11,7 @@ def test_given_valid_args_when_create_then_status_is_pending() -> None:
     WHEN  Consent.create() is called
     THEN  the returned instance has status PENDING
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
     assert consent.status == ConsentStatus.PENDING
 
@@ -22,7 +22,7 @@ def test_given_valid_args_when_create_then_id_is_generated() -> None:
     WHEN  Consent.create() is called
     THEN  the returned instance has a non-None UUID id
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
     assert isinstance(consent.id, UUID)
 
@@ -33,7 +33,7 @@ def test_given_valid_args_when_create_then_timestamps_are_utc() -> None:
     WHEN  Consent.create() is called
     THEN  created_at is timezone-aware and updated_at is None
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
     assert consent.created_at.tzinfo is not None
     assert consent.updated_at is None
@@ -45,7 +45,7 @@ def test_given_valid_args_when_create_then_step_execution_is_attached() -> None:
     WHEN  Consent.create() is called
     THEN  step_execution is set with matching id and application_id
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
     assert consent.step_execution is not None
     assert consent.step_execution.id == consent.id
@@ -58,7 +58,7 @@ def test_given_valid_args_when_create_then_step_execution_name_is_consent() -> N
     WHEN  Consent.create() is called
     THEN  step_execution has name consent, matching status and is_final False
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
     assert consent.step_execution is not None
     assert consent.step_execution.name == "consent"
@@ -72,9 +72,9 @@ def test_given_consent_when_block_called_then_status_is_blocked() -> None:
     WHEN  block() is called
     THEN  status transitions to BLOCKED
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
-    consent.block()
+    consent.decline()
 
     assert consent.status == ConsentStatus.BLOCKED
 
@@ -85,9 +85,9 @@ def test_given_consent_when_complete_called_then_status_is_completed() -> None:
     WHEN  complete() is called
     THEN  status transitions to COMPLETED
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
-    consent.complete()
+    consent.accept()
 
     assert consent.status == ConsentStatus.COMPLETED
 
@@ -98,13 +98,13 @@ def test_given_consent_when_status_changes_then_step_execution_status_matches() 
     WHEN  its status changes
     THEN  step_execution status is updated to the current entity status
     """
-    consent = Consent.create(application_id=UUID(int=1), terms_id=UUID(int=2))
+    consent = Consent.create(application_id=UUID(int=1), term_id=UUID(int=2))
 
-    consent.block()
+    consent.decline()
     assert consent.step_execution is not None
     assert consent.step_execution.status == ConsentStatus.BLOCKED
 
-    consent.complete()
+    consent.accept()
     assert consent.step_execution.status == ConsentStatus.COMPLETED
 
 
