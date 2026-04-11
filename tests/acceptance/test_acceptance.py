@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid7
 
 from chatbot.application.usecases.register_originator_seller import (
     Input as RegisterOriginatorInput,
@@ -6,6 +6,10 @@ from chatbot.application.usecases.register_originator_seller import (
 from chatbot.application.usecases.register_originator_seller import (
     RegisterOriginatorSellerStep,
 )
+from chatbot.application.usecases.request_payment_step import (
+    Input as RequestPaymentStepInput,
+)
+from chatbot.application.usecases.request_payment_step import RequestPaymentStep
 from chatbot.application.usecases.save_cnpj_step import Input as SaveCnpjStepInput
 from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
 from chatbot.application.usecases.save_consent_step import (
@@ -20,19 +24,24 @@ from chatbot.application.usecases.start_application_step import (
     Input as StartApplicationInput,
 )
 from chatbot.application.usecases.start_application_step import StartApplicationStep
+from chatbot.domain.entities import PaymentStatus
 from chatbot.domain.entities.application import ApplicationStatus
 from chatbot.domain.entities.application_contact import ContactStatus
+from chatbot.domain.entities.application_document import ApplicationDocument
 from chatbot.domain.entities.consent import ConsentStatus
 from chatbot.domain.entities.customer import CustomerStatus
+from chatbot.infra.external_services.fake_payment_gateway import FakePaymentGateway
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
 )
 from chatbot.infra.repositories.fake_company_repository import FakeCompanyRepository
 from chatbot.infra.repositories.fake_consent_repository import FakeConsentRepository
 from chatbot.infra.repositories.fake_contact_repository import FakeContactRepository
+from chatbot.infra.repositories.fake_document_repository import FakeDocumentRepository
 from chatbot.infra.repositories.fake_originator_repository import (
     FakeOriginatorRepository,
 )
+from chatbot.infra.repositories.fake_payment_repository import FakePaymentRepository
 
 
 async def test_kyc_flow_with_seller_successfully() -> None:
@@ -42,6 +51,13 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     company_repo = FakeCompanyRepository()
     consent_repo = FakeConsentRepository()
     contact_repo = FakeContactRepository()
+    payment_repo = FakePaymentRepository()
+    document_repo = FakeDocumentRepository(
+        direct_return=ApplicationDocument.create(
+            application_id=uuid7(), document="09888482000132"
+        )
+    )
+    fake_payment_gateway = FakePaymentGateway()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -111,3 +127,42 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     saved_contact = contact_repo.by_id[save_contact_output.id]
     assert saved_contact.status == save_contact_output.status == ContactStatus.COMPLETED
     assert saved_contact.application_id == start_application_output.id
+
+    ########## RequestPaymentStep ##########
+    request_payment_input = RequestPaymentStepInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+    )
+    sut = RequestPaymentStep(
+        application_repo=application_repo,
+        document_repo=document_repo,
+        payment_repo=payment_repo,
+        pix_gateway=fake_payment_gateway,
+    )
+    request_payment_output = await sut.execute(request_payment_input)
+    saved_payment = payment_repo.by_id[request_payment_output.id]
+    assert (
+        saved_payment.status
+        == request_payment_output.status
+        == PaymentStatus.AWAIT_CONFIRMATION
+    )
+    assert saved_payment.application_id == start_application_output.id
+    ########## ConfirmPaymentStep ##########
+    confirm_payment_input = RequestPaymentStepInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+    )
+    sut = RequestPaymentStep(
+        application_repo=application_repo,
+        document_repo=document_repo,
+        payment_repo=payment_repo,
+        pix_gateway=fake_payment_gateway,
+    )
+    request_payment_output = await sut.execute(confirm_payment_input)
+    saved_payment = payment_repo.by_id[request_payment_output.id]
+    assert (
+        saved_payment.status
+        == request_payment_output.status
+        == PaymentStatus.AWAIT_CONFIRMATION
+    )
+    assert saved_payment.application_id == start_application_output.id
