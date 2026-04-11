@@ -1,6 +1,6 @@
 from chatbot.application.services.usecase_registry import UseCaseRegistry
 from chatbot.application.usecases.request_biometric_validation_step import (
-    RequestBiometricValidationStep,
+    StartBiometricValidation,
 )
 from chatbot.domain.entities.application import Application
 from chatbot.domain.entities.biometric_validation import BiometricValidationStatus
@@ -26,7 +26,7 @@ async def test_given_application_when_registry_runs_biometric_step_then_await_co
     fake_biometric_repo = FakeBiometricValidationRepository()
     registry = UseCaseRegistry()
     registry.register_step(
-        RequestBiometricValidationStep(
+        StartBiometricValidation(
             biometric_repo=fake_biometric_repo,
             application_repo=FakeApplicationRepository(seed=[application]),
         )
@@ -59,7 +59,7 @@ async def test_given_no_application_when_biometric_step_runs_then_blocked() -> N
     fake_biometric_repo = FakeBiometricValidationRepository()
     registry = UseCaseRegistry()
     registry.register_step(
-        RequestBiometricValidationStep(
+        StartBiometricValidation(
             biometric_repo=fake_biometric_repo,
             application_repo=FakeApplicationRepository(),
         )
