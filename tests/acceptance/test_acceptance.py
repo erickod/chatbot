@@ -19,6 +19,7 @@ from chatbot.application.usecases.start_application_step import (
 )
 from chatbot.application.usecases.start_application_step import StartApplicationStep
 from chatbot.domain.entities.application import ApplicationStatus
+from chatbot.domain.entities.consent import ConsentStatus
 from chatbot.domain.entities.customer import CustomerStatus
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
@@ -93,6 +94,6 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         application_repository=application_repository,
     )
     save_consent_output = await sut.execute(save_consent_input)
-    saved_company = consent_repository.by_id[save_consent_output.id]
-    assert saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
-    assert saved_company.application_id == start_application_output.id
+    saved_consent = consent_repository.by_id[save_consent_output.id]
+    assert saved_consent.status == save_consent_output.status == ConsentStatus.COMPLETED
+    assert saved_consent.application_id == start_application_output.id
