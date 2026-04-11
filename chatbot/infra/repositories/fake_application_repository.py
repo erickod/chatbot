@@ -1,10 +1,9 @@
 from uuid import UUID
 
 from chatbot.domain.entities.application import Application
-from chatbot.infra.db.postgres.base_repository import BaseRepository
 
 
-class FakeApplicationRepository(BaseRepository):
+class FakeApplicationRepository:
     def __init__(self, seed: list[Application] = []) -> None:
         self.by_id: dict[UUID, Application] = {}
         self.by_phones: dict[tuple[str, str], Application] = {}
