@@ -7,7 +7,9 @@ from chatbot.infra.repositories.fake_application_repository import (
 from chatbot.infra.repositories.fake_save_caller_repository import FakeCallerRepository
 
 
-async def test_given_application_exists_when_registry_runs_name_step_then_completed() -> None:
+async def test_given_application_exists_when_registry_runs_name_step_then_completed() -> (
+    None
+):
     """
     GIVEN an application matching the input phones in the fake repository
     WHEN  UseCaseRegistry.run() executes the 'name' step
@@ -27,7 +29,11 @@ async def test_given_application_exists_when_registry_runs_name_step_then_comple
     )
 
     output = await registry.run(
-        dict(originator_phone="originator_phone", company_phone="company_phone", value="John Doe"),
+        dict(
+            originator_phone="originator_phone",
+            company_phone="company_phone",
+            value="John Doe",
+        ),
         name="name",
     )
 
