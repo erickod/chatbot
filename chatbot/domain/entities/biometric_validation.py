@@ -17,7 +17,8 @@ class BiometricValidationStatus(str, Enum):
 class BiometricValidation(BaseModel):
     id: UUID
     application_id: UUID
-    profile_ref: str
+    provider: str
+    provider_id: str
     status: BiometricValidationStatus
     validation_result: dict
     created_at: datetime
@@ -29,16 +30,17 @@ class BiometricValidation(BaseModel):
     def create(
         cls,
         application_id: UUID,
-        profile_ref: str,
-        validation_result: dict,
+        provider: str,
+        provider_id: str,
     ) -> "BiometricValidation":
         now = datetime.now(timezone.utc)
         instance = cls(
             id=uuid7(),
             application_id=application_id,
-            profile_ref=profile_ref,
+            provider=provider,
+            provider_id=provider_id,
             status=BiometricValidationStatus.AWAIT_CONFIRMATION,
-            validation_result=validation_result,
+            validation_result={},
             created_at=now,
             updated_at=None,
         )

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import pytest
 
 from chatbot.domain.entities import BiometricValidation, BiometricValidationStatus
 
@@ -13,8 +12,8 @@ def test_given_valid_args_when_create_then_status_is_await_confirmation() -> Non
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     assert biometric.status == BiometricValidationStatus.AWAIT_CONFIRMATION
@@ -28,28 +27,11 @@ def test_given_valid_args_when_create_then_id_is_generated() -> None:
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     assert isinstance(biometric.id, UUID)
-
-
-def test_given_valid_args_when_create_then_validation_result_is_preserved() -> None:
-    """
-    GIVEN valid biometric validation arguments
-    WHEN  BiometricValidation.create() is called
-    THEN  the returned instance preserves validation_result
-    """
-    payload = {"score": 0.98, "provider_status": "ok"}
-
-    biometric = BiometricValidation.create(
-        application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result=payload,
-    )
-
-    assert biometric.validation_result == payload
 
 
 def test_given_valid_args_when_create_then_step_execution_is_attached() -> None:
@@ -60,8 +42,8 @@ def test_given_valid_args_when_create_then_step_execution_is_attached() -> None:
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     assert biometric.step_execution is not None
@@ -77,8 +59,8 @@ def test_given_valid_args_when_create_then_step_execution_has_biometric_name() -
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     assert biometric.step_execution is not None
@@ -97,8 +79,8 @@ def test_given_biometric_when_confirm_called_then_status_is_pending() -> None:
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     biometric.confirm()
@@ -114,8 +96,8 @@ def test_given_biometric_when_block_called_then_status_is_blocked() -> None:
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     biometric.block()
@@ -131,8 +113,8 @@ def test_given_biometric_when_complete_called_then_status_is_completed() -> None
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     biometric.complete()
@@ -150,8 +132,8 @@ def test_given_biometric_when_status_changes_then_step_execution_status_matches(
     """
     biometric = BiometricValidation.create(
         application_id=UUID(int=1),
-        profile_ref="profile-123",
-        validation_result={"score": 0.98},
+        provider_id="profile-123",
+        provider="idwall",
     )
 
     biometric.confirm()
@@ -175,16 +157,3 @@ def test_given_entities_package_when_importing_then_biometric_symbols_are_export
     """
     assert BiometricValidation.__name__ == "BiometricValidation"
     assert BiometricValidationStatus.AWAIT_CONFIRMATION == "AWAIT_CONFIRMATION"
-
-
-def test_given_missing_required_arg_when_create_then_type_error_is_raised() -> None:
-    """
-    GIVEN BiometricValidation.create() requires all arguments
-    WHEN  one required argument is omitted
-    THEN  Python raises TypeError for the invalid call signature
-    """
-    with pytest.raises(TypeError):
-        BiometricValidation.create(
-            application_id=UUID(int=1),
-            profile_ref="profile-123",
-        )
