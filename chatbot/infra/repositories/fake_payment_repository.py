@@ -21,3 +21,6 @@ class FakePaymentRepository:
         self, provider: str, provider_id: str
     ) -> Payment | None:
         return self.by_provider.get((provider, provider_id), None)
+
+    async def update(self, payment: Payment) -> None:
+        self._process_seed([payment])
