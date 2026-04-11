@@ -33,14 +33,14 @@ class SaveContactStep:
 
     def __init__(
         self,
-        save_contact_repo: ContactRepository,
-        load_application_repo: ApplicationRepository,
+        contact_repo: ContactRepository,
+        application_repo: ApplicationRepository,
     ) -> None:
-        self._save_contact_repo = save_contact_repo
-        self._load_application_repo = load_application_repo
+        self._contact_repo = contact_repo
+        self._application_repo = application_repo
 
     async def execute(self, input: ContactStepInput) -> ContactStepOutput:
-        application = await self._load_application_repo.get_by_phones(
+        application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
         )
@@ -67,7 +67,7 @@ class SaveContactStep:
             role=input.role,
         )
         application.advance_step(contact.step_execution)
-        await self._save_contact_repo.create(contact)
+        await self._contact_repo.create(contact)
         return ContactStepOutput(
             id=contact.id,
             step_execution_id=contact.step_execution.id,

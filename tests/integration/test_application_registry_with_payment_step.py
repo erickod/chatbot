@@ -34,9 +34,9 @@ def _make_step(
     fake_doc_repo: FakeDocumentRepository,
 ) -> SavePaymentStep:
     return SavePaymentStep(
-        save_payment_repo=fake_payment_repo,
-        load_application_repo=fake_app_repo,
-        load_application_document_repo=fake_doc_repo,
+        payment_repo=fake_payment_repo,
+        application_repo=fake_app_repo,
+        document_repo=fake_doc_repo,
         pix_gateway=FakeStarkbankPixGateway(),
     )
 

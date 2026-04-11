@@ -23,8 +23,8 @@ async def test_given_application_exists_when_registry_runs_name_step_then_comple
     registry = UseCaseRegistry()
     registry.register_step(
         SaveNameStep(
-            save_caller_repo=fake_caller_repo,
-            load_application_repo=FakeApplicationRepository(seed=[application]),
+            caller_repo=fake_caller_repo,
+            application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 
@@ -54,8 +54,8 @@ async def test_given_no_application_when_registry_runs_name_step_then_blocked() 
     registry = UseCaseRegistry()
     registry.register_step(
         SaveNameStep(
-            save_caller_repo=fake_caller_repo,
-            load_application_repo=FakeApplicationRepository(),
+            caller_repo=fake_caller_repo,
+            application_repo=FakeApplicationRepository(),
         )
     )
 

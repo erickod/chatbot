@@ -28,14 +28,14 @@ class SaveCnpjStep:
     def __init__(
         self,
         *,
-        save_company_repo: CompanyRepository,
-        load_application_repo: ApplicationRepository,
+        company_repo: CompanyRepository,
+        application_repo: ApplicationRepository,
     ) -> None:
-        self._save_company_repo = save_company_repo
-        self._load_application_repo = load_application_repo
+        self._company_repo = company_repo
+        self._application_repo = application_repo
 
     async def execute(self, input: CnpjStepInput) -> CnpjStepOutput:
-        application = await self._load_application_repo.get_by_phones(
+        application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
         )
@@ -49,7 +49,7 @@ class SaveCnpjStep:
             application_id=application.id,
         )
         application.advance_step(customer.step_execution)
-        await self._save_company_repo.create(customer)
+        await self._company_repo.create(customer)
         return CnpjStepOutput(
             id=customer.id,
             step_execution_id=customer.step_execution.id,

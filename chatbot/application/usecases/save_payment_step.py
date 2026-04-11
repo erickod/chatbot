@@ -46,18 +46,18 @@ class SavePaymentStep:
     def __init__(
         self,
         *,
-        save_payment_repo: PaymentRepository,
-        load_application_repo: ApplicationRepository,
-        load_application_document_repo: DocumentRepository,
+        payment_repo: PaymentRepository,
+        application_repo: ApplicationRepository,
+        document_repo: DocumentRepository,
         pix_gateway: StarkbankPixGateway,
     ) -> None:
-        self._save_payment_repo = save_payment_repo
-        self._load_application_repo = load_application_repo
-        self._load_application_document_repo = load_application_document_repo
+        self._payment_repo = payment_repo
+        self._application_repo = application_repo
+        self._document_repo = document_repo
         self._pix_gateway = pix_gateway
 
     async def execute(self, input: PaymentStepInput) -> PaymentStepOutput:
-        application = await self._load_application_repo.get_by_phones(
+        application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
         )
@@ -67,10 +67,8 @@ class SavePaymentStep:
                 step_name=self.name,
                 message="Application not found",
             )
-        application_document = (
-            await self._load_application_document_repo.get_by_application_id(
-                application.id
-            )
+        application_document = await self._document_repo.get_by_application_id(
+            application.id
         )
         if (
             not application_document
@@ -101,7 +99,7 @@ class SavePaymentStep:
             expires_at=charge.expires_at,
         )
         application.advance_step(payment.step_execution)
-        await self._save_payment_repo.create(payment)
+        await self._payment_repo.create(payment)
 
         return PaymentStepOutput(
             id=payment.id,

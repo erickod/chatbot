@@ -27,8 +27,8 @@ async def test_given_application_when_registry_runs_biometric_step_then_await_co
     registry = UseCaseRegistry()
     registry.register_step(
         RequestBiometricValidationStep(
-            save_biometric_repo=fake_biometric_repo,
-            load_application_repo=FakeApplicationRepository(seed=[application]),
+            biometric_repo=fake_biometric_repo,
+            application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 
@@ -60,8 +60,8 @@ async def test_given_no_application_when_biometric_step_runs_then_blocked() -> N
     registry = UseCaseRegistry()
     registry.register_step(
         RequestBiometricValidationStep(
-            save_biometric_repo=fake_biometric_repo,
-            load_application_repo=FakeApplicationRepository(),
+            biometric_repo=fake_biometric_repo,
+            application_repo=FakeApplicationRepository(),
         )
     )
 

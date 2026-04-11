@@ -21,8 +21,8 @@ async def test_given_application_when_registry_runs_cnpj_step_then_completed() -
     registry = UseCaseRegistry()
     registry.register_step(
         SaveCnpjStep(
-            save_company_repo=fake_company_repo,
-            load_application_repo=FakeApplicationRepository(seed=[application]),
+            company_repo=fake_company_repo,
+            application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 
@@ -51,8 +51,8 @@ async def test_given_no_application_when_cnpj_step_runs_then_blocked() -> None:
     registry = UseCaseRegistry()
     registry.register_step(
         SaveCnpjStep(
-            save_company_repo=fake_company_repo,
-            load_application_repo=FakeApplicationRepository(),
+            company_repo=fake_company_repo,
+            application_repo=FakeApplicationRepository(),
         )
     )
 
@@ -84,8 +84,8 @@ async def test_given_value_field_in_payload_when_cnpj_step_runs_then_national_id
     registry = UseCaseRegistry()
     registry.register_step(
         SaveCnpjStep(
-            save_company_repo=fake_company_repo,
-            load_application_repo=FakeApplicationRepository(seed=[application]),
+            company_repo=fake_company_repo,
+            application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 

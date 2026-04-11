@@ -21,8 +21,8 @@ async def test_given_application_when_registry_runs_contact_step_then_completed(
     registry = UseCaseRegistry()
     registry.register_step(
         SaveContactStep(
-            save_contact_repo=fake_contact_repo,
-            load_application_repo=FakeApplicationRepository(seed=[application]),
+            contact_repo=fake_contact_repo,
+            application_repo=FakeApplicationRepository(seed=[application]),
         )
     )
 
@@ -56,8 +56,8 @@ async def test_given_no_application_when_contact_step_runs_then_blocked() -> Non
     registry = UseCaseRegistry()
     registry.register_step(
         SaveContactStep(
-            save_contact_repo=fake_contact_repo,
-            load_application_repo=FakeApplicationRepository(),
+            contact_repo=fake_contact_repo,
+            application_repo=FakeApplicationRepository(),
         )
     )
 

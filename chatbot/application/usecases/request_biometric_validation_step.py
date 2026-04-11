@@ -33,14 +33,14 @@ class RequestBiometricValidationStep:
 
     def __init__(
         self,
-        save_biometric_repo: BiometricValidationRepository,
-        load_application_repo: ApplicationRepository,
+        biometric_repo: BiometricValidationRepository,
+        application_repo: ApplicationRepository,
     ) -> None:
-        self._save_biometric_repo = save_biometric_repo
-        self._load_application_repo = load_application_repo
+        self._biometric_repo = biometric_repo
+        self._application_repo = application_repo
 
     async def execute(self, input: BiometricStepInput) -> BiometricStepOutput:
-        application = await self._load_application_repo.get_by_phones(
+        application = await self._application_repo.get_by_phones(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
         )
@@ -57,7 +57,7 @@ class RequestBiometricValidationStep:
             validation_result=input.validation_result,
         )
         application.advance_step(biometric.step_execution)
-        await self._save_biometric_repo.create(biometric)
+        await self._biometric_repo.create(biometric)
         return BiometricStepOutput(
             id=biometric.id,
             step_execution_id=biometric.step_execution.id,
