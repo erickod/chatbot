@@ -14,11 +14,14 @@ from chatbot.application.usecases.save_consent_step import (
 from chatbot.application.usecases.save_consent_step import (
     SaveConsentStep,
 )
+from chatbot.application.usecases.save_contact_step import Input as SaveContactStepInput
+from chatbot.application.usecases.save_contact_step import SaveContactStep
 from chatbot.application.usecases.start_application_step import (
     Input as StartApplicationInput,
 )
 from chatbot.application.usecases.start_application_step import StartApplicationStep
 from chatbot.domain.entities.application import ApplicationStatus
+from chatbot.domain.entities.application_contact import ContactStatus
 from chatbot.domain.entities.consent import ConsentStatus
 from chatbot.domain.entities.customer import CustomerStatus
 from chatbot.infra.repositories.fake_application_repository import (
@@ -26,6 +29,7 @@ from chatbot.infra.repositories.fake_application_repository import (
 )
 from chatbot.infra.repositories.fake_company_repository import FakeCompanyRepository
 from chatbot.infra.repositories.fake_consent_repository import FakeConsentRepository
+from chatbot.infra.repositories.fake_contact_repository import FakeContactRepository
 from chatbot.infra.repositories.fake_originator_repository import (
     FakeOriginatorRepository,
 )
@@ -33,10 +37,11 @@ from chatbot.infra.repositories.fake_originator_repository import (
 
 async def test_kyc_flow_with_seller_successfully() -> None:
     ########## REPOSITORIES ##########
-    originator_repository = FakeOriginatorRepository()
-    application_repository = FakeApplicationRepository()
-    company_repository = FakeCompanyRepository()
-    consent_repository = FakeConsentRepository()
+    originator_repo = FakeOriginatorRepository()
+    application_repo = FakeApplicationRepository()
+    company_repo = FakeCompanyRepository()
+    consent_repo = FakeConsentRepository()
+    contact_repo = FakeContactRepository()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -50,22 +55,22 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         seller_name="Seller",
         seller_email="mail@mail.com",
     )
-    sut = RegisterOriginatorSellerStep(originator_repository=originator_repository)
+    sut = RegisterOriginatorSellerStep(originator_repository=originator_repo)
     register_originator_output = await sut.execute(register_originator_input)
     assert (
         register_originator_output.id
-        == originator_repository.by_id[register_originator_output.id].id
+        == originator_repo.by_id[register_originator_output.id].id
     )
 
     ########## START Application ##########
     start_application_input = StartApplicationInput(
         originator_phone=originator_phone, company_phone=company_phone
     )
-    sut = StartApplicationStep(application_repository=application_repository)
+    sut = StartApplicationStep(application_repository=application_repo)
     start_application_output = await sut.execute(start_application_input)
     assert (
         start_application_output.id
-        == application_repository.by_id[start_application_output.id].id
+        == application_repo.by_id[start_application_output.id].id
     )
     assert start_application_output.status == ApplicationStatus.PENDING
 
@@ -75,11 +80,9 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         company_phone=company_phone,
         national_id="23368630000119",
     )
-    sut = SaveCnpjStep(
-        application_repo=application_repository, company_repo=company_repository
-    )
+    sut = SaveCnpjStep(application_repo=application_repo, company_repo=company_repo)
     save_cnpj_output = await sut.execute(save_cnpj_input)
-    saved_company = company_repository.by_id[save_cnpj_output.id]
+    saved_company = company_repo.by_id[save_cnpj_output.id]
     assert saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
     assert saved_company.application_id == start_application_output.id
 
@@ -90,10 +93,21 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         status="ACCEPTED",
     )
     sut = SaveConsentStep(
-        consent_repository=consent_repository,
-        application_repository=application_repository,
+        consent_repository=consent_repo,
+        application_repository=application_repo,
     )
     save_consent_output = await sut.execute(save_consent_input)
-    saved_consent = consent_repository.by_id[save_consent_output.id]
+    saved_consent = consent_repo.by_id[save_consent_output.id]
     assert saved_consent.status == save_consent_output.status == ConsentStatus.COMPLETED
     assert saved_consent.application_id == start_application_output.id
+
+    ########## SaveContact ##########
+    save_contact_input = SaveContactStepInput(
+        originator_phone=originator_phone,
+        company_phone=company_phone,
+    )
+    sut = SaveContactStep(application_repo=application_repo, contact_repo=contact_repo)
+    save_contact_output = await sut.execute(save_contact_input)
+    saved_contact = contact_repo.by_id[save_contact_output.id]
+    assert saved_contact.status == save_contact_output.status == ContactStatus.COMPLETED
+    assert saved_contact.application_id == start_application_output.id
