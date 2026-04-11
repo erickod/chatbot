@@ -15,8 +15,8 @@ from chatbot.domain.entities.biometric_validation import (
 class Input(BaseModel):
     originator_phone: str
     company_phone: str
-    profile_ref: str
-    validation_result: dict
+    provider_id: str
+    provider: str = "idwall"
 
 
 class Output(BaseModel):
@@ -53,8 +53,8 @@ class StartBiometricValidation:
             )
         biometric = BiometricValidation.create(
             application_id=application.id,
-            profile_ref=input.profile_ref,
-            validation_result=input.validation_result,
+            provider_id=input.provider_id,
+            provider=input.provider,
         )
         application.advance_step(biometric.step_execution)
         await self._biometric_repo.create(biometric)
