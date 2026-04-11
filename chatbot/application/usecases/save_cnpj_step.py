@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, Field
 
+from chatbot.application.protocols.application_repository import ApplicationRepository
 from chatbot.application.protocols.save_company_repository import CompanyRepository
 from chatbot.domain.entities.customer import Customer, CustomerStatus
 
