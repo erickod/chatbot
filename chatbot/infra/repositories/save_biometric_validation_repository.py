@@ -10,7 +10,7 @@ class SABiometricValidationRepository(BaseRepository):
             DBBiometricValidation(
                 id=biometric.id,
                 application_id=biometric.application_id,
-                profile_ref=biometric.profile_ref,
+                provider_id=biometric.provider_id,
                 status=biometric.status.value,
                 validation_result=biometric.validation_result,
             )
@@ -22,7 +22,7 @@ class SABiometricValidationRepository(BaseRepository):
                 name=step.name,
                 status=str(step.status),
                 data={
-                    "profile_ref": biometric.profile_ref,
+                    "provider_id": biometric.provider_id,
                     "validation_result": biometric.validation_result,
                 },
             )

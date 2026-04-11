@@ -126,7 +126,7 @@ class DBBiometricValidation(BaseModel):
     application_id: Mapped[UUID] = mapped_column(
         ForeignKey("application.id", ondelete="RESTRICT"), nullable=False
     )
-    profile_ref: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    provider_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
     status: Mapped[str] = mapped_column(
         String,
         nullable=False,

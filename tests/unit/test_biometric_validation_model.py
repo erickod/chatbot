@@ -50,19 +50,19 @@ def test_given_application_id_column_when_inspecting_fk_then_targets_application
     assert application_id_column.nullable is False
 
 
-def test_given_profile_ref_column_when_inspecting_mapping_then_is_string_required_and_indexed() -> (
+def test_given_provider_id_column_when_inspecting_mapping_then_is_string_required_and_indexed() -> (
     None
 ):
     """
     GIVEN the DBBiometricValidation ORM model declaration
-    WHEN  the profile_ref column metadata is inspected
+    WHEN  the provider_id column metadata is inspected
     THEN  it is a required indexed String column
     """
     table = DBBiometricValidation.__table__
 
-    assert isinstance(table.c.profile_ref.type, String)
-    assert table.c.profile_ref.nullable is False
-    assert table.c.profile_ref.index is True
+    assert isinstance(table.c.provider_id.type, String)
+    assert table.c.provider_id.nullable is False
+    assert table.c.provider_id.index is True
 
 
 def test_given_status_column_when_inspecting_mapping_then_is_string_indexed_with_default() -> (
@@ -102,7 +102,7 @@ def test_given_db_biometric_validation_when_inspecting_constraints_then_has_no_u
     """
     GIVEN the DBBiometricValidation ORM model declaration
     WHEN  its constraints are inspected
-    THEN  there is no uniqueness on application_id or application_id plus profile_ref
+    THEN  there is no uniqueness on application_id or application_id plus provider_id
     """
     table = DBBiometricValidation.__table__
 
@@ -114,7 +114,7 @@ def test_given_db_biometric_validation_when_inspecting_constraints_then_has_no_u
     ]
 
     assert ("application_id",) not in unique_constraints
-    assert ("application_id", "profile_ref") not in unique_constraints
+    assert ("application_id", "provider_id") not in unique_constraints
 
 
 def test_given_db_documentation_when_reading_biometric_validation_section_then_matches_model() -> (
@@ -132,5 +132,5 @@ def test_given_db_documentation_when_reading_biometric_validation_section_then_m
     assert "`biometric_validation`" in db_doc
     assert "application.id" in db_doc
     assert "AWAIT_CONFIRMATION" in db_doc
-    assert "profile_ref" in db_doc
+    assert "provider_id" in db_doc
     assert "validation_result" in db_doc
