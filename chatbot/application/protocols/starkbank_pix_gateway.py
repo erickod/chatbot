@@ -14,5 +14,5 @@ class PixChargePayload:
     expires_at: datetime | None
 
 
-class StarkbankPixGateway:
-    async def create_charge(self, payment: Payment) -> PixChargePayload: ...
+class PaymentGateway:
+    async def create_charge(self, payment: Payment) -> None: ...
