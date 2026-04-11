@@ -36,7 +36,7 @@ async def test_given_application_when_registry_runs_biometric_step_then_await_co
         dict(
             originator_phone="orig_bio_3",
             company_phone="appl_bio_3",
-            profile_ref="profile-reg",
+            provider_id="profile-reg",
             validation_result={"score": 0.90},
         ),
         name="biometric",
@@ -46,7 +46,7 @@ async def test_given_application_when_registry_runs_biometric_step_then_await_co
     assert output.step_execution_id is not None
     assert output.status == BiometricValidationStatus.AWAIT_CONFIRMATION
     biometric = fake_biometric_repo.by_id[output.id]
-    assert biometric.profile_ref == "profile-reg"
+    assert biometric.provider_id == "profile-reg"
     assert biometric.validation_result == {"score": 0.90}
 
 
@@ -69,7 +69,7 @@ async def test_given_no_application_when_biometric_step_runs_then_blocked() -> N
         dict(
             originator_phone="unknown_orig",
             company_phone="unknown_appl",
-            profile_ref="profile-ghost",
+            provider_id="profile-ghost",
             validation_result={"score": 0.0},
         ),
         name="biometric",
