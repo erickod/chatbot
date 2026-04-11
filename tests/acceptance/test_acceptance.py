@@ -1,5 +1,7 @@
 from uuid import UUID, uuid7
 
+from chatbot.application.usecases.confirm_payment import ConfirmPayment
+from chatbot.application.usecases.confirm_payment import Input as ConfirmPaymentInput
 from chatbot.application.usecases.register_originator_seller import (
     Input as RegisterOriginatorInput,
 )
@@ -137,7 +139,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         application_repo=application_repo,
         document_repo=document_repo,
         payment_repo=payment_repo,
-        pix_gateway=fake_payment_gateway,
+        payment_gateway=fake_payment_gateway,
     )
     request_payment_output = await sut.execute(request_payment_input)
     saved_payment = payment_repo.by_id[request_payment_output.id]
@@ -148,21 +150,14 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     assert saved_payment.application_id == start_application_output.id
     ########## ConfirmPaymentStep ##########
-    confirm_payment_input = RequestPaymentStepInput(
-        originator_phone=originator_phone,
-        company_phone=company_phone,
+    confirm_payment_input = ConfirmPaymentInput(
+        gateway=request_payment_output.gateway,
+        reference=request_payment_output.gateway_reference,
     )
-    sut = RequestPaymentStep(
-        application_repo=application_repo,
-        document_repo=document_repo,
-        payment_repo=payment_repo,
-        pix_gateway=fake_payment_gateway,
-    )
-    request_payment_output = await sut.execute(confirm_payment_input)
-    saved_payment = payment_repo.by_id[request_payment_output.id]
+    sut = ConfirmPayment(payment_repo=payment_repo)
+    confirm_payment_output = await sut.execute(confirm_payment_input)
+    saved_payment = payment_repo.by_id[confirm_payment_output.id]
     assert (
-        saved_payment.status
-        == request_payment_output.status
-        == PaymentStatus.AWAIT_CONFIRMATION
+        saved_payment.status == confirm_payment_output.status == PaymentStatus.COMPLETED
     )
     assert saved_payment.application_id == start_application_output.id
