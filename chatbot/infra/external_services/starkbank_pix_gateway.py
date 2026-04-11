@@ -9,6 +9,13 @@ from chatbot.settings import settings
 
 
 class StarkbankPixGatewayAdapter(StarkbankPixGateway):
+    """
+    Usando a lib do startkbank,
+    o brcode.uuid -> UUID(brcode.uuid)
+    se torna -> UUID('11748720-23f4-4ba9-84ec-ad3f811b1393')
+    -> para a tabela pix_id
+    """
+
     async def create_charge(self, payment: Payment) -> PixChargePayload:
         try:
             import starkbank
