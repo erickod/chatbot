@@ -4,7 +4,7 @@ from chatbot.infra.orm.sqlalchemy.models import DBStepExecution
 
 
 class SASaveCallerRepository(BaseRepository):
-    async def run(self, caller: Caller) -> None:
+    async def create(self, caller: Caller) -> None:
         step = caller.step_execution
         self.db_session.add(
             DBStepExecution(
