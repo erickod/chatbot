@@ -8,6 +8,7 @@ from chatbot.application.protocols.load_application_document_repository import (
     DocumentRepository,
 )
 from chatbot.application.protocols.save_payment_repository import PaymentRepository
+from chatbot.application.protocols.starkbank_pix_gateway import PaymentGateway
 from chatbot.domain.entities.application_document import DocumentEligibilityStatus
 from chatbot.domain.entities.payment import Payment, PaymentStatus
 
@@ -27,6 +28,8 @@ class Output(BaseModel):
     pix_qrcode: str | None = None
     pix_amount_cents: int | None = None
     step_name: str
+    gateway: str
+    gateway_reference: str
     message: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
@@ -37,7 +40,7 @@ class Output(BaseModel):
         return "{:.2f}".format(Decimal(self.pix_amount_cents) / 100)
 
 
-class ProcessPayment:
+class RequestPaymentStep:
     input_schema: type[Input] = Input
     output_schema: type[Output] = Output
     name: str = "payment"
@@ -48,12 +51,12 @@ class ProcessPayment:
         payment_repo: PaymentRepository,
         application_repo: ApplicationRepository,
         document_repo: DocumentRepository,
-        pix_gateway: StarkbankPixGateway,
+        payment_gateway: PaymentGateway,
     ) -> None:
         self._payment_repo = payment_repo
         self._application_repo = application_repo
         self._document_repo = document_repo
-        self._pix_gateway = pix_gateway
+        self._payment_gateway = payment_gateway
 
     async def execute(self, input: Input) -> Output:
         application = await self._application_repo.get_by_phones(
@@ -87,7 +90,7 @@ class ProcessPayment:
             expires_at=None,
             national_id=application_document.document,
         )
-        await self._pix_gateway.create_charge(payment)
+        await self._payment_gateway.create_charge(payment)
         application.advance_step(payment.step_execution)
         await self._payment_repo.create(payment)
         return Output(
@@ -98,5 +101,7 @@ class ProcessPayment:
             pix_clipboard=payment.qr_code_text,
             pix_qrcode=payment.qr_code_uri,
             pix_amount_cents=payment.amount_cents,
+            gateway=payment.provider or "",
+            gateway_reference=payment.provider_id or "",
             step_name=self.name,
         )
