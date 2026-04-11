@@ -71,5 +71,5 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     save_cnpj_output = await sut.execute(save_cnpj_input)
     saved_company = company_repository.by_id[save_cnpj_output.id]
-    saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
+    assert saved_company.status == save_cnpj_output.status == CustomerStatus.COMPLETED
     assert saved_company.application_id == start_application_output.id
