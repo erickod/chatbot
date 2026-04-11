@@ -2,11 +2,10 @@ from datetime import datetime
 
 from chatbot.application.protocols.starkbank_pix_gateway import PixChargePayload
 from chatbot.application.services.usecase_registry import UseCaseRegistry
-from chatbot.application.usecases.save_payment_step import SavePaymentStep
-from chatbot.domain.entities.application import Application, ApplicationStatus
+from chatbot.application.usecases.request_payment_step import RequestPaymentStep
+from chatbot.domain.entities.application import Application
 from chatbot.domain.entities.application_document import (
     ApplicationDocument,
-    DocumentEligibilityStatus,
 )
 from chatbot.domain.entities.payment import Payment, PaymentStatus
 from chatbot.infra.repositories.fake_application_repository import (
@@ -32,8 +31,8 @@ def _make_step(
     fake_payment_repo: FakePaymentRepository,
     fake_app_repo: FakeApplicationRepository,
     fake_doc_repo: FakeDocumentRepository,
-) -> SavePaymentStep:
-    return SavePaymentStep(
+) -> RequestPaymentStep:
+    return RequestPaymentStep(
         payment_repo=fake_payment_repo,
         application_repo=fake_app_repo,
         document_repo=fake_doc_repo,
@@ -177,7 +176,7 @@ async def test_given_company_phone_input_when_payment_step_runs_then_maps_correc
 ):
     """
     GIVEN a payment step input with a specific company_phone value
-    WHEN  SavePaymentStep.execute() is called directly
+    WHEN  RequestPaymentStep.execute() is called directly
     THEN  the application is found and payment is created with the correct amount
     """
     application = Application.create(
