@@ -4,9 +4,9 @@ from uuid import UUID
 from pydantic import BaseModel, computed_field
 
 from chatbot.application.protocols.load_application_document_repository import (
-    LoadApplicationDocumentRepository,
+    DocumentRepository,
 )
-from chatbot.application.protocols.save_payment_repository import SavePaymentRepository
+from chatbot.application.protocols.save_payment_repository import PaymentRepository
 from chatbot.application.protocols.starkbank_pix_gateway import StarkbankPixGateway
 from chatbot.domain.entities.application_document import DocumentEligibilityStatus
 from chatbot.domain.entities.payment import Payment, PaymentStatus
@@ -46,9 +46,9 @@ class SavePaymentStep:
     def __init__(
         self,
         *,
-        save_payment_repo: SavePaymentRepository,
+        save_payment_repo: PaymentRepository,
         load_application_repo: ApplicationRepository,
-        load_application_document_repo: LoadApplicationDocumentRepository,
+        load_application_document_repo: DocumentRepository,
         pix_gateway: StarkbankPixGateway,
     ) -> None:
         self._save_payment_repo = save_payment_repo
@@ -67,8 +67,10 @@ class SavePaymentStep:
                 step_name=self.name,
                 message="Application not found",
             )
-        application_document = await self._load_application_document_repo.run(
-            application.id
+        application_document = (
+            await self._load_application_document_repo.get_by_application_id(
+                application.id
+            )
         )
         if (
             not application_document
@@ -99,7 +101,7 @@ class SavePaymentStep:
             expires_at=charge.expires_at,
         )
         application.advance_step(payment.step_execution)
-        await self._save_payment_repo.run(payment)
+        await self._save_payment_repo.create(payment)
 
         return PaymentStepOutput(
             id=payment.id,

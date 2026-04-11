@@ -10,8 +10,10 @@ from chatbot.infra.db.postgres.base_repository import BaseRepository
 from chatbot.infra.orm.sqlalchemy.models import DBOApplicationDocument
 
 
-class SALoadApplicationDocumentRepository(BaseRepository):
-    async def run(self, application_id: UUID) -> ApplicationDocument | None:
+class SADocumentRepository(BaseRepository):
+    async def get_by_application_id(
+        self, application_id: UUID
+    ) -> ApplicationDocument | None:
         db_document = (
             await self.db_session.execute(
                 select(DBOApplicationDocument).where(

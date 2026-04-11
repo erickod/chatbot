@@ -3,8 +3,8 @@ from chatbot.infra.db.postgres.base_repository import BaseRepository
 from chatbot.infra.orm.sqlalchemy.models import DBPixCharge, DBStepExecution
 
 
-class SASavePaymentRepository(BaseRepository):
-    async def run(self, payment: Payment) -> None:
+class SAPaymentRepository(BaseRepository):
+    async def create(self, payment: Payment) -> None:
         step = payment.step_execution
         self.db_session.add(
             DBPixCharge(

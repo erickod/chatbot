@@ -1,5 +1,5 @@
 from chatbot.domain.entities.payment import Payment
 
 
-class SavePaymentRepository:
-    async def run(self, payment: Payment) -> None: ...
+class PaymentRepository:
+    async def create(self, payment: Payment) -> None: ...
