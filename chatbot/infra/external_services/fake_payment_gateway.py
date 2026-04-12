@@ -4,7 +4,6 @@ from chatbot.domain.entities.payment import Payment
 
 
 class FakePaymentGateway:
-    def __init__(self) -> None: ...
     async def create_charge(self, payment: Payment) -> None:
         payment.register_gateway_reference(
             gateway=self.__class__.__name__,

@@ -39,6 +39,9 @@ from chatbot.domain.entities.application_document import ApplicationDocument
 from chatbot.domain.entities.biometric_validation import BiometricValidationStatus
 from chatbot.domain.entities.consent import ConsentStatus
 from chatbot.domain.entities.customer import CustomerStatus
+from chatbot.infra.external_services.fake_biometric_validation_gateway import (
+    FakeBiometricValidationGateway,
+)
 from chatbot.infra.external_services.fake_payment_gateway import FakePaymentGateway
 from chatbot.infra.repositories.fake_application_repository import (
     FakeApplicationRepository,
@@ -71,6 +74,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     fake_payment_gateway = FakePaymentGateway()
     biometric_repo = FakeBiometricValidationRepository()
+    biometric_validation_gateway = FakeBiometricValidationGateway()
 
     ########## PARMS ##########
     originator_phone: str = "ophone"
@@ -180,7 +184,10 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         provider="idwall",
     )
     sut = StartBiometricValidation(
-        biometric_repo=biometric_repo, application_repo=application_repo
+        biometric_repo=biometric_repo,
+        application_repo=application_repo,
+        biometric_validation_gateway=biometric_validation_gateway,
+        contact_repo=contact_repo,
     )
     request_biometric_validation_output = await sut.execute(
         request_biometric_validation_input
