@@ -3,10 +3,11 @@ from http import HTTPStatus
 from typing import Any, cast
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from opentelemetry import trace
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatbot.application.services.usecase_registry import (
     StateLoaderRegistry,
@@ -19,6 +20,7 @@ from chatbot.application.usecases.save_consent_step import SaveTermsStep
 from chatbot.application.usecases.save_contact_step import SaveContactStep
 from chatbot.application.usecases.start_application_step import StartApplicationStep
 from chatbot.domain.entities.application import Application
+from chatbot.infra.db.postgres import get_session
 from chatbot.infra.external_services.starkbank_pix_gateway import (
     StarkbankPixGatewayAdapter,
 )
@@ -31,6 +33,7 @@ from chatbot.infra.repositories.fake_consent_repository import FakeConsentReposi
 from chatbot.infra.repositories.fake_contact_repository import FakeContactRepository
 from chatbot.infra.repositories.fake_document_repository import FakeDocumentRepository
 from chatbot.infra.repositories.fake_payment_repository import FakePaymentRepository
+from chatbot.infra.repositories.sa_application_repository import SAApplicationRepository
 
 logger: logging.Logger = logging.getLogger(__name__)
 tracer = trace.get_tracer(__name__)
@@ -106,10 +109,11 @@ async def update_step_bot(payload: UpdateStepIn) -> JSONResponse:
 async def restore_session(
     originator_phone: str,
     company_phone: str,
+    db_session: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     registry = StateLoaderRegistry()
     registry.register_step(
-        StartApplicationStep(application_repository=application_repo)
+        StartApplicationStep(application_repository=SAApplicationRepository(db_session))
     )
     steps = await registry.run(
         dict(originator_phone=originator_phone, company_phone=company_phone)
