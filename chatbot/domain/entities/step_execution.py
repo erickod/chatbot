@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class StepExecution(BaseModel):
@@ -14,7 +14,6 @@ class StepExecution(BaseModel):
     name: str
     data: dict[str, Any] = {}
     is_final: bool
-    model_config = ConfigDict(frozen=True)
 
     @property
     def started_at(self) -> datetime:
