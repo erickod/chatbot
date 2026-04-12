@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    PROJECT_ID: str = ""
     ENVIRONMENT: str = ""
     OTEL_SERVICE_NAME: str = ""
     OTEL_EXPORTER_OTLP_ENDPOINT: str = ""
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
     STARKBANK_ENVIRONMENT: str = ""
     STARKBANK_PROJECT_ID: str = ""
     STARKBANK_PRIVATE_KEY: str = ""
+    PROCESS_FACELINK_WEBHOOK_SUB_NAME: str = ""
+    PROCESS_PIX_CHARGE_WEBHOOK_SUB_NAME: str = ""
+    MAX_MESSAGES: int = 1
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
