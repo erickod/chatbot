@@ -17,6 +17,7 @@ class Output(BaseModel):
     id: UUID | None = None
     step_execution_id: UUID | None = None
     status: str
+    message: str = ""
 
 
 class SaveNameStep:
@@ -38,7 +39,9 @@ class SaveNameStep:
             company_phone=input.company_phone,
         )
         if not application:
-            return Output(status=NameStepStatus.BLOCKED)
+            return Output(
+                status=NameStepStatus.BLOCKED, message="Application not found"
+            )
         caller = Caller.create(name=input.value, application_id=application.id)
         application.advance_step(caller.step_execution)
         await self._caller_repo.create(caller)
