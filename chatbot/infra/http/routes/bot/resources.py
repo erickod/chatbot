@@ -14,6 +14,7 @@ from chatbot.application.services.usecase_registry import (
     UseCaseRegistry,
 )
 from chatbot.application.usecases.load_caller import LoadCaller
+from chatbot.application.usecases.load_customer import LoadCustomer
 from chatbot.application.usecases.request_payment_step import RequestPaymentStep
 from chatbot.application.usecases.save_caller_step import SaveNameStep
 from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
@@ -36,6 +37,7 @@ from chatbot.infra.repositories.fake_document_repository import FakeDocumentRepo
 from chatbot.infra.repositories.fake_payment_repository import FakePaymentRepository
 from chatbot.infra.repositories.sa_application_repository import SAApplicationRepository
 from chatbot.infra.repositories.save_caller_repository import SACallerRepository
+from chatbot.infra.repositories.save_company_repository import SACompanyRepository
 
 logger: logging.Logger = logging.getLogger(__name__)
 tracer = trace.get_tracer(__name__)
@@ -73,6 +75,7 @@ async def update_step_bot(
 ) -> JSONResponse:
     application_repo = SAApplicationRepository(db_session)
     caller_repo = SACallerRepository(db_session)
+    company_repo = SACompanyRepository(db_session)
     payload.data = {
         k.replace(f"{payload.current_step}_", ""): v for k, v in payload.data.items()
     }
@@ -118,11 +121,13 @@ async def restore_session(
     db_session: AsyncSession = Depends(get_session),
 ) -> JSONResponse:
     caller_repo = SACallerRepository(db_session)
+    company_repo = SACompanyRepository(db_session)
     registry = StateLoaderRegistry()
     registry.register_step(
         StartApplicationStep(application_repository=SAApplicationRepository(db_session))
     )
     registry.register_step(LoadCaller(caller_repo=caller_repo))
+    registry.register_step(LoadCustomer(company_repo=company_repo))
     steps = await registry.run(
         dict(originator_phone=originator_phone, company_phone=company_phone)
     )
