@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 import starkbank
@@ -42,3 +42,7 @@ class StarkbankPixGatewayAdapter:
             payment.register_gateway_reference(
                 gateway="starkbank", ref=str(UUID(brcode.uuid))
             )
+            # TODO: fix envy data below
+            payment.qr_code_text = brcode.id
+            payment.qr_code_uri = brcode.picture_url
+            payment.expires_at = datetime.now(tz=timezone.utc) + brcode.expiration

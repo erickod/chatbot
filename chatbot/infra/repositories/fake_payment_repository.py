@@ -4,9 +4,12 @@ from chatbot.domain.entities.payment import Payment
 
 
 class FakePaymentRepository:
-    def __init__(self, seed: list[Payment] = []) -> None:
+    def __init__(
+        self, seed: list[Payment] = [], direct_return: Payment | None = None
+    ) -> None:
         self.by_id: dict[UUID, Payment] = {}
         self.by_provider: dict[tuple[str | None, str | None], Payment] = {}
+        self.direct_return = direct_return
         self._process_seed(seed)
 
     def _process_seed(self, seed: list[Payment]) -> None:
@@ -20,6 +23,8 @@ class FakePaymentRepository:
     async def load_by_provider_id(
         self, provider: str, provider_id: str
     ) -> Payment | None:
+        if self.direct_return:
+            return self.direct_return
         return self.by_provider.get((provider, provider_id), None)
 
     async def update(self, payment: Payment) -> None:

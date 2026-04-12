@@ -67,6 +67,8 @@ class RequestPaymentStep:
             return Output(
                 status=PaymentStatus.BLOCKED,
                 step_name=self.name,
+                gateway="",
+                gateway_reference="",
                 message="Application not found",
             )
         application_document = await self._document_repo.get_by_application_id(
@@ -80,6 +82,8 @@ class RequestPaymentStep:
             return Output(
                 status=PaymentStatus.BLOCKED,
                 step_name=self.name,
+                gateway="",
+                gateway_reference="",
                 message="Application document not found",
             )
         payment = Payment.create(

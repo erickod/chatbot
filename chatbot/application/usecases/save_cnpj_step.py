@@ -46,8 +46,7 @@ class SaveCnpjStep:
                 step_name=self.name,
             )
         customer = Customer.create(
-            national_id=input.national_id,
-            application_id=application.id,
+            national_id=input.national_id, application_id=application.id
         )
         application.advance_step(customer.step_execution)
         await self._company_repo.create(customer)
