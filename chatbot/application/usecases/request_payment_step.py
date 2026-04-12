@@ -4,12 +4,9 @@ from uuid import UUID
 from pydantic import BaseModel, computed_field
 
 from chatbot.application.protocols.application_repository import ApplicationRepository
-from chatbot.application.protocols.load_application_document_repository import (
-    DocumentRepository,
-)
 from chatbot.application.protocols.payment_gateway import PaymentGateway
+from chatbot.application.protocols.save_contact_repository import ContactRepository
 from chatbot.application.protocols.save_payment_repository import PaymentRepository
-from chatbot.domain.entities.application_document import DocumentEligibilityStatus
 from chatbot.domain.entities.payment import Payment, PaymentStatus
 
 
@@ -50,12 +47,12 @@ class RequestPaymentStep:
         *,
         payment_repo: PaymentRepository,
         application_repo: ApplicationRepository,
-        document_repo: DocumentRepository,
+        contact_repo: ContactRepository,
         payment_gateway: PaymentGateway,
     ) -> None:
         self._payment_repo = payment_repo
         self._application_repo = application_repo
-        self._document_repo = document_repo
+        self._contact_repoo = contact_repo
         self._payment_gateway = payment_gateway
 
     async def execute(self, input: Input) -> Output:
@@ -71,20 +68,14 @@ class RequestPaymentStep:
                 gateway_reference="",
                 message="Application not found",
             )
-        application_document = await self._document_repo.get_by_application_id(
-            application.id
-        )
-        if (
-            not application_document
-            or not application_document.document
-            or application_document.status != DocumentEligibilityStatus.COMPLETED
-        ):
+        contact = await self._contact_repoo.load_by_application_id(application.id)
+        if not contact or not contact.cpf:
             return Output(
                 status=PaymentStatus.BLOCKED,
                 step_name=self.name,
                 gateway="",
                 gateway_reference="",
-                message="Application document not found",
+                message="Application Contact not found",
             )
         payment = Payment.create(
             application_id=application.id,
@@ -92,7 +83,7 @@ class RequestPaymentStep:
             qr_code_text=None,
             qr_code_uri=None,
             expires_at=None,
-            national_id=application_document.document,
+            national_id=contact.cpf,
         )
         await self._payment_gateway.create_charge(payment)
         application.advance_step(payment.step_execution)

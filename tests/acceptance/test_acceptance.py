@@ -158,7 +158,7 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     )
     sut = RequestPaymentStep(
         application_repo=application_repo,
-        document_repo=document_repo,
+        contact_repo=contact_repo,
         payment_repo=payment_repo,
         payment_gateway=fake_payment_gateway,
     )
