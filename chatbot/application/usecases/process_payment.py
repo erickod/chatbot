@@ -8,7 +8,6 @@ from chatbot.application.protocols.load_application_document_repository import (
     DocumentRepository,
 )
 from chatbot.application.protocols.save_payment_repository import PaymentRepository
-from chatbot.application.protocols.starkbank_pix_gateway import StarkbankPixGateway
 from chatbot.domain.entities.application_document import DocumentEligibilityStatus
 from chatbot.domain.entities.payment import Payment, PaymentStatus
 
