@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Protocol
 
 from chatbot.domain.entities.payment import Payment
 
@@ -14,5 +15,5 @@ class PixChargePayload:
     expires_at: datetime | None
 
 
-class PaymentGateway:
+class PaymentGateway(Protocol):
     async def create_charge(self, payment: Payment) -> None: ...
