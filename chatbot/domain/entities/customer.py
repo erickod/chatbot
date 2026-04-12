@@ -18,18 +18,22 @@ class Customer(BaseModel):
     id: UUID
     application_id: UUID
     national_id: CNPJNationalID
+    trading_name: str | None
     status: CustomerStatus
     created_at: datetime
     updated_at: datetime
     _step_execution: StepExecution | None = PrivateAttr()
 
     @classmethod
-    def create(cls, national_id: str, application_id: UUID) -> "Customer":
+    def create(
+        cls, national_id: str, application_id: UUID, trading_name: str | None = None
+    ) -> "Customer":
         now = datetime.now(tz=timezone.utc)
         instance = cls(
             id=uuid7(),
             application_id=application_id,
             national_id=CNPJNationalID(value=national_id),
+            trading_name=trading_name,
             status=CustomerStatus.COMPLETED,
             created_at=now,
             updated_at=now,
