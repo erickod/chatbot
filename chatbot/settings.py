@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     PROCESS_FACELINK_WEBHOOK_SUB_NAME: str = ""
     PROCESS_PIX_CHARGE_WEBHOOK_SUB_NAME: str = ""
     MAX_MESSAGES: int = 1
+    SERVICE_NAME: str = "chatbot"
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
