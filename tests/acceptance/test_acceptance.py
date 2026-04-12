@@ -27,10 +27,10 @@ from chatbot.application.usecases.request_payment_step import RequestPaymentStep
 from chatbot.application.usecases.save_cnpj_step import Input as SaveCnpjStepInput
 from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
 from chatbot.application.usecases.save_consent_step import (
-    Input as SaveConsentStepInput,
+    Input as SaveTermsStepInput,
 )
 from chatbot.application.usecases.save_consent_step import (
-    SaveConsentStep,
+    SaveTermsStep,
 )
 from chatbot.application.usecases.save_contact_step import Input as SaveContactStepInput
 from chatbot.application.usecases.save_contact_step import SaveContactStep
@@ -126,12 +126,12 @@ async def test_kyc_flow_with_seller_successfully() -> None:
     assert saved_company.application_id == start_application_output.id
 
     ########## SaveConsent ##########
-    save_consent_input = SaveConsentStepInput(
+    save_consent_input = SaveTermsStepInput(
         originator_phone=originator_phone,
         company_phone=company_phone,
         status="ACCEPTED",
     )
-    sut = SaveConsentStep(
+    sut = SaveTermsStep(
         consent_repository=consent_repo,
         application_repository=application_repo,
     )

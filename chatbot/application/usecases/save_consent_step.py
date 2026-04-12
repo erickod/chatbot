@@ -21,10 +21,10 @@ class Output(BaseModel):
     status: str = "PENDING"
 
 
-class SaveConsentStep:
+class SaveTermsStep:
     input_schema = Input
     output_schema = Output
-    name: str = "consent"
+    name: str = "terms"
 
     def __init__(
         self,
