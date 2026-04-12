@@ -2,6 +2,12 @@ from uuid import UUID, uuid7
 
 from chatbot.application.usecases.confirm_payment import ConfirmPayment
 from chatbot.application.usecases.confirm_payment import Input as ConfirmPaymentInput
+from chatbot.application.usecases.process_biometric_validation import (
+    Input as ProcessBiometricValidationInput,
+)
+from chatbot.application.usecases.process_biometric_validation import (
+    ProcessBiometricValidation,
+)
 from chatbot.application.usecases.register_originator_seller import (
     Input as RegisterOriginatorInput,
 )
@@ -197,5 +203,23 @@ async def test_kyc_flow_with_seller_successfully() -> None:
         biometric_validation.status
         == request_biometric_validation_output.status
         == BiometricValidationStatus.AWAIT_CONFIRMATION
+    )
+    assert biometric_validation.application_id == start_application_output.id
+    ########## ProcessBiometricValidation ##########
+    process_biometric_validation_input = ProcessBiometricValidationInput(
+        provider_id=request_biometric_validation_input.provider_id,
+        provider=request_biometric_validation_input.provider,
+    )
+    sut = ProcessBiometricValidation(
+        biometric_repo=biometric_repo, application_repo=application_repo
+    )
+    process_biometric_validation_output = await sut.execute(
+        process_biometric_validation_input
+    )
+    biometric_validation = biometric_repo.by_id[process_biometric_validation_output.id]
+    assert (
+        biometric_validation.status
+        == process_biometric_validation_output.status
+        == BiometricValidationStatus.COMPLETED
     )
     assert biometric_validation.application_id == start_application_output.id
