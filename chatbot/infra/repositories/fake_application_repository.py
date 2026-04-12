@@ -21,3 +21,6 @@ class FakeApplicationRepository:
 
     async def create(self, application: Application) -> None:
         self._process_seed([application])
+
+    async def get_by_id(self, id: UUID) -> Application | None:
+        return self.by_id.get(id)

@@ -1,4 +1,5 @@
 from typing import Protocol
+from uuid import UUID
 
 from chatbot.domain.entities.application import Application
 
@@ -9,3 +10,5 @@ class ApplicationRepository(Protocol):
     ) -> Application | None: ...
 
     async def create(self, application: Application) -> None: ...
+
+    async def get_by_id(self, id: UUID) -> Application | None: ...
