@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from chatbot.application.protocols.application_repository import ApplicationRepository
 from chatbot.domain.entities.application import Application, ApplicationStatus
@@ -14,6 +14,9 @@ class Input(BaseModel):
 class Output(BaseModel):
     id: UUID | None = None
     status: str
+    step_name: str
+
+    model_config = ConfigDict(json_encoders={UUID: str})
 
 
 class StartApplicationStep:
@@ -28,7 +31,7 @@ class StartApplicationStep:
         application = Application.create(
             originator_phone=input.originator_phone,
             company_phone=input.company_phone,
-            status=ApplicationStatus.PENDING,
+            status=ApplicationStatus.IN_PROGRESS,
         )
         await self.application_repository.create(application)
-        return Output(id=application.id, status=application.status)
+        return Output(id=application.id, status=application.status, step_name=self.name)

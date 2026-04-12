@@ -1,5 +1,6 @@
 import logging
 from http import HTTPStatus
+from typing import Any, cast
 from uuid import UUID
 
 from fastapi import APIRouter
@@ -7,12 +8,16 @@ from fastapi.responses import JSONResponse
 from opentelemetry import trace
 from pydantic import BaseModel, Field
 
-from chatbot.application.services.usecase_registry import UseCaseRegistry
+from chatbot.application.services.usecase_registry import (
+    StateLoaderRegistry,
+    UseCaseRegistry,
+)
 from chatbot.application.usecases.request_payment_step import RequestPaymentStep
 from chatbot.application.usecases.save_caller_step import SaveNameStep
 from chatbot.application.usecases.save_cnpj_step import SaveCnpjStep
 from chatbot.application.usecases.save_consent_step import SaveTermsStep
 from chatbot.application.usecases.save_contact_step import SaveContactStep
+from chatbot.application.usecases.start_application_step import StartApplicationStep
 from chatbot.domain.entities.application import Application
 from chatbot.infra.external_services.starkbank_pix_gateway import (
     StarkbankPixGatewayAdapter,
@@ -91,7 +96,7 @@ async def update_step_bot(payload: UpdateStepIn) -> JSONResponse:
     if output := await registry.run(payload.data, name=payload.current_step):
         # TODO: handle convertions inside each output dto - not on dict compreehension
         return JSONResponse(
-            {k: v and str(v) or v for k, v in output.model_dump().items()}
+            {k: v and str(v) or v for k, v in output.model_dump(mode="json").items()}
         )
     return JSONResponse({"error": "unknown step"}, status_code=HTTPStatus.BAD_REQUEST)
 
@@ -102,5 +107,16 @@ async def restore_session(
     originator_phone: str,
     company_phone: str,
 ) -> JSONResponse:
-
-    return JSONResponse({})
+    registry = StateLoaderRegistry()
+    registry.register_step(
+        StartApplicationStep(application_repository=application_repo)
+    )
+    steps = await registry.run(
+        dict(originator_phone=originator_phone, company_phone=company_phone)
+    )
+    response: dict[str, Any] = {
+        "steps": [
+            cast(BaseModel, handler).model_dump(mode="json") for handler in steps
+        ],
+    }
+    return JSONResponse(response)
