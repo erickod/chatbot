@@ -10,7 +10,7 @@ class FakeApplicationRepository:
         self.by_id: dict[UUID, Application] = {}
         self.by_phones: dict[tuple[str, str], Application] = {}
         self.direct_return = direct_return
-        self._process_seed(seed)
+        self._process_seed(seed or [direct_return] if direct_return else seed)
 
     def _process_seed(self, seed: list[Application]) -> None:
         for item in seed:
