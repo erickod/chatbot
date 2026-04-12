@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from chatbot.domain.entities.application import ApplicationStatus
+from chatbot.domain.entities.customer import CustomerStatus
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -180,3 +181,13 @@ class DBStepExecution(BaseModel):
     __table_args__ = (
         UniqueConstraint("application_id", "name", name="uq_step_execution_app_step"),
     )
+
+
+class DBCustomer(BaseModel):
+    __tablename__ = "customer"
+    application_id: Mapped[UUID] = mapped_column(
+        ForeignKey("application.id", ondelete="CASCADE"), nullable=False
+    )
+    national_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    trading_name: Mapped[str] = mapped_column(String, nullable=True)
+    status: Mapped[CustomerStatus] = mapped_column(String, nullable=False)
