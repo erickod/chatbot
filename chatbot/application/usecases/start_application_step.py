@@ -19,6 +19,7 @@ class Output(BaseModel):
 class StartApplicationStep:
     input_schema: type[Input] = Input
     output_schema: type[Output] = Output
+    name: str = "application"
 
     def __init__(self, *, application_repository: ApplicationRepository) -> None:
         self.application_repository = application_repository
