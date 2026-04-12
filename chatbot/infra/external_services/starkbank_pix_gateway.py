@@ -1,7 +1,7 @@
 from datetime import timedelta
+from uuid import UUID
 
 import starkbank
-from sqlalchemy import UUID
 
 from chatbot.domain.entities.payment import Payment
 from chatbot.settings import settings
@@ -40,5 +40,5 @@ class StarkbankPixGatewayAdapter:
         )
         for brcode in brcodes:
             payment.register_gateway_reference(
-                gateway="starkbank", ref=str(UUID(brcode.UUID))
+                gateway="starkbank", ref=str(UUID(brcode.uuid))
             )
