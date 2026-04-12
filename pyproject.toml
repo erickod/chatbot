@@ -6,7 +6,7 @@ authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "alembic (>=1.18.4,<2.0.0)",
     "sqlalchemy[asyncio] (>=2.0.49,<3.0.0)",
@@ -19,6 +19,10 @@ dependencies = [
     "starkbank (>=2.27.0,<3.0.0)",
     "email-validator (>=2.3.0,<3.0.0)"
 ]
+
+[tool.poetry.group.lend.dependencies]
+lend-hermes = {version = "^3.4.2", source = "gcloud"}
+lendmeanapi = {version = "1.3.0b2", source = "gcloud"}
 
 
 [tool.mypy]
@@ -40,3 +44,8 @@ dev = [
     "ruff (>=0.15.9,<0.16.0)",
     "mypy (>=1.20.0,<2.0.0)"
 ]
+
+[[tool.poetry.source]]
+name = "gcloud"
+url = "https://us-central1-python.pkg.dev/sp-hub-shared-2f207822/python/simple/"
+priority = "supplemental"
