@@ -1,8 +1,9 @@
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from chatbot.domain.entities.caller import Caller
 from chatbot.infra.db.postgres.base_repository import BaseRepository
-from chatbot.infra.orm.sqlalchemy.models import DBStepExecution
+from chatbot.infra.orm.sqlalchemy.models import DBApplication, DBStepExecution
 
 
 class SACallerRepository(BaseRepository):
@@ -38,3 +39,25 @@ class SACallerRepository(BaseRepository):
             caller.created_at = row.created_at
             caller.updated_at = row.updated_at
             await self.db_session.commit()
+
+    async def load_by_phones(
+        self, originator_phone: str, company_phone: str
+    ) -> Caller | None:
+        stmt = (
+            select(DBStepExecution)
+            .join(DBApplication, DBStepExecution.application_id == DBApplication.id)
+            .where(
+                DBStepExecution.name == "name",
+                DBApplication.originator_phone == originator_phone,
+                DBApplication.company_phone == company_phone,
+            )
+        )
+        if row := (await self.db_session.execute(stmt)).scalar_one_or_none():
+            return Caller(
+                application_id=row.application_id,
+                id=row.id,
+                name=row.data.get("name", ""),
+                status=row.status,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
