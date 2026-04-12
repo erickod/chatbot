@@ -4,9 +4,12 @@ from chatbot.domain.entities.application import Application
 
 
 class FakeApplicationRepository:
-    def __init__(self, seed: list[Application] = []) -> None:
+    def __init__(
+        self, seed: list[Application] = [], direct_return: Application | None = None
+    ) -> None:
         self.by_id: dict[UUID, Application] = {}
         self.by_phones: dict[tuple[str, str], Application] = {}
+        self.direct_return = direct_return
         self._process_seed(seed)
 
     def _process_seed(self, seed: list[Application]) -> None:
@@ -17,6 +20,8 @@ class FakeApplicationRepository:
     async def get_by_phones(
         self, originator_phone: str, company_phone: str
     ) -> Application | None:
+        if self.direct_return:
+            return self.direct_return
         return self.by_phones.get((originator_phone, company_phone))
 
     async def create(self, application: Application) -> None:
