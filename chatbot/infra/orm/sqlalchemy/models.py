@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from chatbot.domain.entities.application import ApplicationStatus
+from chatbot.domain.entities.consent import ConsentChoice
 from chatbot.domain.entities.customer import CustomerStatus
 from sqlalchemy import (
     BigInteger,
@@ -137,12 +138,6 @@ class DBBiometricValidation(BaseModel):
     validation_result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
 
 
-class ConsentStatus(str, Enum):
-    PENDING = "PENDING"
-    BLOCKED = "BLOCKED"
-    COMPLETED = "COMPLETED"
-
-
 class DBTerms(BaseModel):
     __tablename__ = "terms"
 
@@ -159,11 +154,11 @@ class DBConsent(BaseModel):
     application_id: Mapped[UUID] = mapped_column(
         ForeignKey("application.id", ondelete="CASCADE"), nullable=False
     )
-    terms_id: Mapped[UUID] = mapped_column(
+    term_id: Mapped[UUID] = mapped_column(
         ForeignKey("terms.id", ondelete="RESTRICT"), nullable=False
     )
-    status: Mapped[str] = mapped_column(
-        String, nullable=False, server_default="PENDING"
+    status: Mapped[ConsentChoice] = mapped_column(
+        String, nullable=False, server_default=ConsentChoice.PENDING.value
     )
 
 
