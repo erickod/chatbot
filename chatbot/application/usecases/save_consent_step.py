@@ -1,5 +1,5 @@
 from typing import Literal
-from uuid import UUID, uuid7
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ class Input(BaseModel):
     originator_phone: str
     company_phone: str
     status: Literal["DECLINED", "ACCEPTED"]
-    term_id: UUID | None = None
+    term_id: UUID = UUID("019d8300-1de5-704b-8782-42a0ec84287e")
 
 
 class Output(BaseModel):
@@ -24,7 +24,7 @@ class Output(BaseModel):
 class SaveTermsStep:
     input_schema = Input
     output_schema = Output
-    name: str = "terms"
+    name: str = "summary"
 
     def __init__(
         self,
@@ -41,7 +41,7 @@ class SaveTermsStep:
             company_phone=input.company_phone,
         ):
             consent = Consent.create(
-                application_id=application.id, term_id=input.term_id or uuid7()
+                application_id=application.id, term_id=input.term_id
             )
             consent.accept() if input.status == "ACCEPTED" else consent.decline()
             await self._consent_repository.create(consent)
