@@ -36,6 +36,7 @@ from chatbot.infra.repositories.fake_contact_repository import FakeContactReposi
 from chatbot.infra.repositories.fake_document_repository import FakeDocumentRepository
 from chatbot.infra.repositories.fake_payment_repository import FakePaymentRepository
 from chatbot.infra.repositories.sa_application_repository import SAApplicationRepository
+from chatbot.infra.repositories.sa_consent_repository import SAConsentRepository
 from chatbot.infra.repositories.save_caller_repository import SACallerRepository
 from chatbot.infra.repositories.save_company_repository import SACompanyRepository
 
@@ -76,15 +77,13 @@ async def update_step_bot(
     application_repo = SAApplicationRepository(db_session)
     caller_repo = SACallerRepository(db_session)
     company_repo = SACompanyRepository(db_session)
+    consent_repo = SAConsentRepository(db_session)
     payload.data = {
         k.replace(f"{payload.current_step}_", ""): v for k, v in payload.data.items()
     }
     registry = UseCaseRegistry()
     registry.register_step(
         SaveNameStep(caller_repo=caller_repo, application_repo=application_repo)
-    )
-    registry.register_step(
-        SaveCnpjStep(application_repo=application_repo, company_repo=company_repo)
     )
     registry.register_step(
         SaveCnpjStep(application_repo=application_repo, company_repo=company_repo)

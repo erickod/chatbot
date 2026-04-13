@@ -50,7 +50,7 @@ class Consent(BaseModel):
             id=self.id,
             application_id=self.application_id,
             created_at=self.created_at,
-            name="consent",
+            name="summary",
             status=self.status,
             is_final=False,
         )
